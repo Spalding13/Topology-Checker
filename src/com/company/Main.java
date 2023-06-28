@@ -20,7 +20,7 @@ public class Main {
         List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
 
 
-        String input = NetlistReader.openFile("E:\\ESD Checks\\input\\netlist.cdl");
+        String input = NetlistReader.openFile("C:\\Projects\\Java\\Workspace_Topology\\Topology-Checker\\input\\netlist.cdl");
 
         System.out.println(input);
 
@@ -34,16 +34,18 @@ public class Main {
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
         CopyOnWriteArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
 
+      for (Device i: devices){
+           System.out.println(" PRINTING DEVICES -> " + i.name + i.params);
+       }
+
         List<String> designDetails = netlistInfo.get("designDetails");
 
         Graph graph = GraphFactory.buildGraph(nets, devices);
 
-//        for (Net net: nets){
-//            System.out.println(" PRINTING NETS -> " + net.name);
-//        }
-//
-//        for (Device device: devices){
-//            System.out.println(" PRINTING DEVICES -> " + device.deviceName + device.params);
-//        }
+       for (Net net: nets){
+           System.out.println(" PRINTING NETS -> " + net.name);
+       }
+
+ 
     }
 }
