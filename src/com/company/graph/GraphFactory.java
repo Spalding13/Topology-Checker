@@ -4,6 +4,7 @@ import com.company.devicefactory.Device;
 import com.company.netFactory.Net;
 import com.company.netFactory.NetFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -97,8 +98,7 @@ public class GraphFactory {
                                 System.out.println("Skipping for "+device1.name);
                              } else {
                                 System.out.println(device.name + " and " + device1.name + " are parallel");
-                                devices.remove(device);
-                                devices.remove(device1);
+                                reduceDevices(device,device1);
 
                                 // Nice place to start reducing/optimizing the graph ?
                             }
@@ -111,10 +111,35 @@ public class GraphFactory {
             });
 
         }
-        
+        static String DeviceEqName ="XD_eq";
+        static int DeviceEqNum = 0;
         public static void reduceDevices(Device device1, Device device2) {
+            
+                System.out.println("Reducing to equivalent netlist");
+                Device device_eq = device1;
+                Collection<String> device_parameters1;
+                Collection<String> device_parameters2;
+                devices.remove(device1);
+                devices.remove(device2);
+                device_parameters1 = device1.params.values();
+                device_parameters2 = device2.params.values();
+                Object[] params1 = device_parameters1.toArray();
+                Object[] params2 = device_parameters2.toArray();
+                double number1 = Double.valueOf(params1[2].toString().replaceAll("[^0-9.]", ""));
+                double number2 = Double.valueOf(params2[2].toString().replaceAll("[^0-9.]", ""));
+                double area_pd_eq = number1 + number2;
 
-  
+                number1 = Double.valueOf(params1[0].toString().replaceAll("[^0-9.]", ""));
+                number2 = Double.valueOf(params2[0].toString().replaceAll("[^0-9.]", ""));
+
+                double nf_eq = number1 + number2;
+                device_eq.name = DeviceEqName+Integer.toString(DeviceEqNum);
+                device_eq.params.put("nf",Double.toString(nf_eq));
+                device_eq.params.put("areapd",Double.toString(area_pd_eq));
+                DeviceEqNum++;
+                System.out.println(device_eq);
+                
+                devices.add(device_eq);
 
         }
     }
