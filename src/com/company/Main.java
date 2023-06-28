@@ -27,24 +27,23 @@ public class Main {
         // netlistInfo => "devices", "nets", "designDetails"
         Map<String, List<String>> netlistInfo = StateMachine.parseNetlist(input);
 
-        netlistInfo.forEach((key, value) -> {
-            System.out.println(key + " -> " + value);
-        });
+        // netlistInfo.forEach((key, value) -> {
+        //     System.out.println(key + " -> " + value);
+        // });
 
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
         CopyOnWriteArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
 
-      for (Device i: devices){
-           System.out.println(" PRINTING DEVICES -> " + i.name + i.params);
-       }
+    //   for (Device i: devices){
+    //        System.out.println(" PRINTING DEVICES -> " + i.name + i.params);
+    //    }
 
         List<String> designDetails = netlistInfo.get("designDetails");
 
         Graph graph = GraphFactory.buildGraph(nets, devices);
-
-       for (Net net: nets){
-           System.out.println(" PRINTING NETS -> " + net.name);
-       }
+    //    for (Net net: nets){
+    //        System.out.println(" PRINTING NETS -> " + net.name);
+    //    }
 
  
     }

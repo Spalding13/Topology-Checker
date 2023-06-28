@@ -29,7 +29,6 @@ public class GraphFactory {
     private static void transformNetlist() {
 
         NetlistTransformer.parallelTransform();
-
     }
 
     public static Graph buildGraph(List<Net> nets, CopyOnWriteArrayList<Device> devices) {
@@ -93,9 +92,16 @@ public class GraphFactory {
                         }
 
                         if (sameModels.get() && allPinsParallel.get()) {
-                            System.out.println(device.name + " and " + device1.name + " are parallel");
-                            devices.remove(device);
-                            devices.remove(device1);
+
+                             if(device.name == device1.name){
+                                System.out.println("Skipping for "+device1.name);
+                             } else {
+                                System.out.println(device.name + " and " + device1.name + " are parallel");
+                                devices.remove(device);
+                                devices.remove(device1);
+
+                                // Nice place to start reducing/optimizing the graph ?
+                            }
                         }
 
                     });
@@ -106,8 +112,9 @@ public class GraphFactory {
 
         }
         
-        public void reduceDevices(Device device1, Device device2) {
+        public static void reduceDevices(Device device1, Device device2) {
 
+  
 
         }
     }
