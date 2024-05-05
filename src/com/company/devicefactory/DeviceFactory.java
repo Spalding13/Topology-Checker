@@ -21,10 +21,10 @@ public class DeviceFactory {
         return deviceByType;
     }
 
-    public static CopyOnWriteArrayList<Device> createDevices (List<String> deviceLines) {
+    public static ArrayList<Device> createDevices (List<String> deviceLines) {
 
 
-        CopyOnWriteArrayList<Device> devices = new CopyOnWriteArrayList<>();
+        ArrayList<Device> devices = new ArrayList<>();
         Map<String, List<Device>> deviceByType = initDeviceByType();
 
 

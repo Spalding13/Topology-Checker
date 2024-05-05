@@ -10,18 +10,18 @@ import java.util.regex.Pattern;
 public class StateMachine {
 
     // Design info section:
-    private static Pattern startPt = Pattern.compile(".*auCdl Netlist:.*");
-    private static Pattern designLinePt = Pattern.compile("\\*[A-Z].* *");
+    private static final Pattern startPt = Pattern.compile(".*auCdl Netlist:.*");
+    private static final Pattern designLinePt = Pattern.compile("\\*[A-Z].* *");
 
     // Devices section:
-    private static Pattern devicePt = Pattern.compile("^[A-Z]+[0-9]+");
-    private static Pattern deviceParamsPt = Pattern.compile("^\\+.*");
+    private static final Pattern devicePt = Pattern.compile("^[A-Z]+[0-9]+");
+    private static final Pattern deviceParamsPt = Pattern.compile("^\\+.*");
 
     // Input
     private static String[] lines;
 
     // Output
-    private static Map< String, List<String> > netlistInfo = new HashMap<>();
+    private static final Map< String, List<String> > netlistInfo = new HashMap<>();
 
     private static List<String> designDetails = new ArrayList<>();
     private static List<String> devices = new ArrayList<>();
@@ -62,7 +62,7 @@ public class StateMachine {
 
 
         while (currentLineIdx < lines.length && devicePt.matcher(lines[currentLineIdx]).find()) {
-//            System.out.println("DEVICE LINE - > " + deviceLine);
+            //System.out.println("DEVICE LINE - > " + deviceLine);
 
             parseNets(currentLineIdx);
 

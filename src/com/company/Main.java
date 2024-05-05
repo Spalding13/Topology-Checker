@@ -30,7 +30,7 @@ public class Main {
         // Object creation section
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
 
-        CopyOnWriteArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
+        ArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
 
         List<String> designDetails = netlistInfo.get("designDetails");
 
