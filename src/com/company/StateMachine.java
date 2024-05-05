@@ -62,7 +62,7 @@ public class StateMachine {
 
 
         while (currentLineIdx < lines.length && devicePt.matcher(lines[currentLineIdx]).find()) {
-            System.out.println("DEVICE LINE - > " + deviceLine);
+//            System.out.println("DEVICE LINE - > " + deviceLine);
 
             parseNets(currentLineIdx);
 

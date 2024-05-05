@@ -35,6 +35,10 @@ public abstract class Device {
 
     public abstract void extractPinsAndNets(String[] deviceLine);
 
+    public  Map<String, String> getPinsAndNetsStr(){
+        return this.pinsAndNets;
+    };
+
     public void extractModel(String[] deviceLine) {
         Pattern namePattern = Pattern.compile("(?<![0-9])[a-z]+(?!=)(?![0-9])(?![a-z]+)");
 
@@ -60,6 +64,10 @@ public abstract class Device {
 
     public void setPinNetMap (String pin, Net net) {
         this.pinNetMap.put(pin, net);
+    }
+
+    public Map<String, Net> getPinNetMap() {
+        return this.pinNetMap;
     }
 
     public String getPinNetMapString () {

@@ -27,10 +27,6 @@ public class Main {
         // netlistInfo => "devices", "nets", "designDetails"
         Map<String, List<String>> netlistInfo = StateMachine.parseNetlist(input);
 
-        netlistInfo.forEach((key, value) -> {
-            System.out.println(key + " -> " + value);
-        });
-
         // Object creation section
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
 

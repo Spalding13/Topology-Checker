@@ -5,115 +5,75 @@ import com.company.netFactory.Net;
 import com.company.netFactory.NetFactory;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * GraphFactory builds a graph data structure based on a netlist of devices and their connections.
+ */
 public class GraphFactory {
 
-    private static List<Net> nets;
-    private static CopyOnWriteArrayList<Device> devices;
-
-    // Helper method that associate each device to each net
-    private static void tieNetsToDevices(List<Net> nets, List<Device> devices) {
-
-        for (Device device: devices) {
-
-            device.pinsAndNets.forEach((pin, net)-> {
-                Net netObj = NetFactory.getNetByName(net);
-                netObj.setDevicesConnectedToNet(device);
-                device.setPinNetMap(pin, netObj);
-            });
-        }
-
-    }
-
-    private static void transformNetlist() {
-
-        NetlistTransformer.parallelTransform();
-
-    }
-
-    public static Graph buildGraph(List<Net> nets, CopyOnWriteArrayList<Device> devices) {
-
-        GraphFactory.devices = devices;
-        GraphFactory.nets = nets;
-
-        tieNetsToDevices(GraphFactory.nets, GraphFactory.devices);
-//        transformNetlist();
-
+    /**
+     * Builds the graph data structure.
+     *
+     * @param nets    List of nets
+     * @param devices List of devices
+     * @return The constructed graph
+     */
+    public static Graph buildGraph(List<Net> nets, List<Device> devices) {
+        // Create an empty graph
         Graph graph = new Graph();
 
-        GraphFactory.devices.forEach(device -> {
-            System.out.println(device.name);
+        // Associate each device with its connected nets objects in the graph
+        tieNetsToDevices(devices);
 
-            Node deviceNode = graph.addDeviceNode(device);
+        // Add device and net nodes to the graph and establish connections
+        addNodesAndEdges(graph, devices);
 
-            System.out.println(deviceNode);
-
-            //Device could be added already (although unlikely)
-            if(deviceNode==null) return;
-
-            device.pinNetMap.forEach((pin, net) -> {
-
-                Node netNode = graph.addNetNode(net);
-
-                //Net could be added already
-                if(netNode==null) netNode = graph.getNetNodeByName(net);
-
-                System.out.println("Device node->" + deviceNode);
-                graph.addEdge(deviceNode, netNode, pin);
-            });
-        });
-
+        // Print the graph for debugging purposes
         graph.printGraph();
+
         return graph;
-        }
+    }
 
-    public static class NetlistTransformer {
-
-
-        public static void parallelTransform() {
-
-            GraphFactory.devices.forEach(device -> {
-
-                device.pinNetMap.forEach((pin, net) -> {
-                    String pinsAndNetsString = device.getPinNetMapString();
-                    List<Device> devicesConnectedtoNet = net.getDevicesConnectedToNet();
-
-                    AtomicReference<Boolean> sameModels = new AtomicReference<>(false);
-                    AtomicReference<Boolean> allPinsParallel = new AtomicReference<>(false);
-
-
-                    devicesConnectedtoNet.forEach(device1 -> {
-
-                        String pinsAndNetsString1 = device1.getPinNetMapString();
-
-                        if(device1.deviceType.equals(device.deviceType)) {
-                            sameModels.set(true);
-                        }
-
-                        if(pinsAndNetsString1.equals(pinsAndNetsString)) {
-                            allPinsParallel.set(true);
-                        }
-
-                        if (sameModels.get() && allPinsParallel.get()) {
-                            System.out.println(device.name + " and " + device1.name + " are parallel");
-                            devices.remove(device);
-                            devices.remove(device1);
-                        }
-
-                    });
-
-                });
-
-            });
-
-        }
-        
-        public void reduceDevices(Device device1, Device device2) {
-
-
+    /**
+     * Associates each device with its connected nets. !This will modify the List of devices!
+     *
+     * @param devices List of devices
+     */
+    private static void tieNetsToDevices(List<Device> devices) {
+        for (Device device : devices) {
+            for (String pin : device.getPinsAndNetsStr().keySet()) {
+                // Get the net object associated with the device pin
+                Net netObj = NetFactory.getNetByName(device.getPinsAndNetsStr().get(pin));
+                // Update the net object with the connected device
+                netObj.setDevicesConnectedToNet(device);
+                // Update the device with the associated net object
+                device.setPinNetMap(pin, netObj);
+            }
         }
     }
 
+    /**
+     * Adds device and net nodes to the graph and establishes connections between them.
+     *
+     * @param graph   The graph to which nodes and edges will be added
+     * @param devices List of devices
+     */
+    private static void addNodesAndEdges(Graph graph, List<Device> devices) {
+
+        for (Device device : devices) {
+            // Add device node to the graph
+            Node deviceNode = graph.addDeviceNode(device);
+            if (deviceNode != null) {
+                for (String pin : device.getPinNetMap().keySet()) {
+                    // Add net node to the graph
+                    Net net = device.getPinNetMap().get(pin);
+                    Node netNode = graph.addNetNode(net);
+                    // Establish connection between device and net nodes
+                    //Net could be added already
+                    if(netNode==null) netNode = graph.getNetNodeByName(net);
+                    graph.addEdge(deviceNode, netNode, pin);
+                }
+            }
+        }
     }
+}
