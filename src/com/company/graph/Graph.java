@@ -64,14 +64,14 @@ public class Graph {
 
     public Node getNetNodeByName(Net net) {
 
-        System.out.println("Getting node with net name " + net.name);
+//        System.out.println("Getting node with net name " + net.name);
         return this.netNodeMap.get(net.name);
 
     }
 
     public Node getDeviceNodeByName(Device device) {
 
-        System.out.println("Getting node with net name " + device.name);
+//        System.out.println("Getting node with net name " + device.name);
         return this.deviceNodeMap.get(device.name);
 
     }

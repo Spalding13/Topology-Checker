@@ -36,7 +36,10 @@ public class Main {
 
         Graph graph = GraphFactory.buildGraph(nets, devices);
 
-        System.out.println("TEST");
+        Reducer.reduce(graph);
+
+
+
 //        For testing purposes
 
 //        for (Net net: nets){
