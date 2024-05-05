@@ -14,6 +14,7 @@ public class Node {
 
     private Map<Object, String> connection;
 
+    // Constructor -- could be better
     public Node(Device device, Net net){
 
         if (device!= null) setType("Device");
@@ -26,6 +27,7 @@ public class Node {
     public Object getVertex() {
         return vertex;
     }
+
     private void setType (String type) {this.type = type;}
 
     public String toString(){

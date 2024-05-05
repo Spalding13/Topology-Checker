@@ -31,7 +31,6 @@ public class DeviceFactory {
         deviceLines.parallelStream().forEach(line -> {
 
 
-            System.out.println("Creating ->" + line);
 
             if (line.contains("esddiode")) {
 

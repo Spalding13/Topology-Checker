@@ -17,13 +17,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
+        // Enlist all available ports
         List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
-
-
+        // Read .cdl input file in to a string
         String input = NetlistReader.openFile("E:\\ESD Checks\\input\\netlist.cdl");
 
-        System.out.println(input);
 
+        // Parse input string
         // netlistInfo => "devices", "nets", "designDetails"
         Map<String, List<String>> netlistInfo = StateMachine.parseNetlist(input);
 
@@ -31,12 +31,17 @@ public class Main {
             System.out.println(key + " -> " + value);
         });
 
+        // Object creation section
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
+
         CopyOnWriteArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
 
         List<String> designDetails = netlistInfo.get("designDetails");
 
         Graph graph = GraphFactory.buildGraph(nets, devices);
+
+        System.out.println("TEST");
+//        For testing purposes
 
 //        for (Net net: nets){
 //            System.out.println(" PRINTING NETS -> " + net.name);

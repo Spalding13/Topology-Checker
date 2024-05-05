@@ -15,10 +15,6 @@ public class Connection {
 
 
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(this.node.toString() + " : " + this.pin);
-
-        return stringBuilder.toString();
-
+        return this.node.toString() + " : " + this.pin;
     }
 }

@@ -13,6 +13,7 @@ public class GraphFactory {
     private static List<Net> nets;
     private static CopyOnWriteArrayList<Device> devices;
 
+    // Helper method that associate each device to each net
     private static void tieNetsToDevices(List<Net> nets, List<Device> devices) {
 
         for (Device device: devices) {
@@ -38,14 +39,17 @@ public class GraphFactory {
         GraphFactory.nets = nets;
 
         tieNetsToDevices(GraphFactory.nets, GraphFactory.devices);
-        transformNetlist();
+//        transformNetlist();
 
         Graph graph = new Graph();
 
         GraphFactory.devices.forEach(device -> {
             System.out.println(device.name);
+
             Node deviceNode = graph.addDeviceNode(device);
+
             System.out.println(deviceNode);
+
             //Device could be added already (although unlikely)
             if(deviceNode==null) return;
 
