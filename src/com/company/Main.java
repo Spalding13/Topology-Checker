@@ -9,9 +9,6 @@ import com.company.netFactory.NetFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.company.graph.GraphFactory.buildGraph;
 
 public class Main {
 
@@ -30,7 +27,7 @@ public class Main {
         // Object creation section
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
 
-        ArrayList<Device> devices = DeviceFactory.createDevices(netlistInfo.get("devices"));
+        List<Device> devices = DeviceFactory.createDevicesFromLines(netlistInfo.get("devices"));
 
         List<String> designDetails = netlistInfo.get("designDetails");
 

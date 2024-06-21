@@ -9,8 +9,8 @@ public class Node {
 
     private Object vertex;
     private String type;
-    private Device device;
-    private Net net;
+    public Device device;
+    public Net net;
 
     private Map<Object, String> connection;
 
@@ -28,6 +28,10 @@ public class Node {
         return vertex;
     }
 
+    public Device getDevice(){
+        return device;
+    }
+
     private void setType (String type) {this.type = type;}
 
     public String toString(){
@@ -35,9 +39,9 @@ public class Node {
         String elementName = "";
 
         if (type.equals("Device")){
-            elementName = this.device.name;
+            elementName = this.device.getName();
         } else if (type.equals("Net")) {
-            elementName = this.net.name;
+            elementName = this.net.getName();
         }
 
         return elementName;

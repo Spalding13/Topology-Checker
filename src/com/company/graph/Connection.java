@@ -5,7 +5,8 @@ import com.company.netFactory.Net;
 
 public class Connection {
 
-    public Node node;
+    private Node node;
+
     public String pin;
 
     public Connection (Node node, String pin) {
@@ -14,7 +15,15 @@ public class Connection {
     }
 
 
+    public Node getNode() {
+        return node;
+    }
+    public String getPin() {
+        return pin;
+    }
+
     public String toString() {
         return this.node.toString() + " : " + this.pin;
     }
+
 }

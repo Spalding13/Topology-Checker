@@ -5,6 +5,7 @@ import com.company.netFactory.Net;
 import com.company.netFactory.NetFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * GraphFactory builds a graph data structure based on a netlist of devices and their connections.
@@ -41,12 +42,12 @@ public class GraphFactory {
      */
     private static void tieNetsToDevices(List<Device> devices) {
         for (Device device : devices) {
-            for (String pin : device.getPinsAndNetsStr().keySet()) {
-                // Get the net object associated with the device pin
-                Net netObj = NetFactory.getNetByName(device.getPinsAndNetsStr().get(pin));
-                // Update the net object with the connected device
+            Map<String, String> pinsAndNets = device.getPinsAndNets(); // Updated to use getPinsAndNets
+
+            for (String pin : pinsAndNets.keySet()) {
+                String netName = pinsAndNets.get(pin);
+                Net netObj = NetFactory.getNetByName(netName);
                 netObj.setDevicesConnectedToNet(device);
-                // Update the device with the associated net object
                 device.setPinNetMap(pin, netObj);
             }
         }

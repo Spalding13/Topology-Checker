@@ -19,6 +19,14 @@ public class Net {
 
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<String> getTypes () {return this.types;}
 
     public List<Device> getDevicesConnectedToNet () {return this.deviceList;}
@@ -32,7 +40,7 @@ public class Net {
 
     public void setDevicesConnectedToNet (Device device) {
         if(!this.deviceList.contains(device)) {
-            this.setNetType(device.deviceType);
+            this.setNetType(device.getDeviceType());
             this.deviceList.add(device);
         }
     }

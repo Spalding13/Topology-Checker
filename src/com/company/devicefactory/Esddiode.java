@@ -1,27 +1,64 @@
 package com.company.devicefactory;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
+/**
+ * Class representing an Esddiode device, extending from Device.
+ */
 public class Esddiode extends Device {
+    private final int numberOfPins = 2;
+    /**
+     * Constructor for creating a single Esddiode device from a line of text.
+     * @param deviceLine The line containing device information.
+     */
+    public Esddiode(String deviceLine) {
+        super();
 
-    public Esddiode(String deviceLine){
         String[] deviceTokens = deviceLine.split(" ");
-        this.numberOfPins = 2;
-        this.deviceType = "D";
+        this.setDeviceType("D");
 
-        this.extractName(deviceTokens);
-        this.extractModel(deviceTokens);
-        this.extractPinsAndNets(deviceTokens);
-        this.extractParams(deviceTokens);
+        extractName(deviceTokens);
+        extractModel(deviceTokens, getClass().getSimpleName().toLowerCase());
+        extractPinsAndNets(deviceTokens);
+        extractParams(deviceTokens);
     }
 
+    /**
+     * Constructor for creating a combined Esddiode device.
+     * @param device The base device object to combine into an Esddiode.
+     */
+    public Esddiode(Device device) {
+        super(device.getDeviceType(), device.getName(), device.getModelName());
+
+        this.getPinsAndNets().putAll(device.getPinsAndNets()); // Example of combining pins and nets
+        // Additional initialization specific to Esddiode
+    }
+
+    /**
+     * Extracts pins and nets specific to Esddiode from the given line of text.
+     * @param deviceLine The line containing device information.
+     */
     @Override
     public void extractPinsAndNets(String[] deviceLine) {
-        this.pinsAndNets.put("pos", deviceLine[1]);
-        this.pinsAndNets.put("neg", deviceLine[2]);
+        this.getPinsAndNets().put("pos", deviceLine[1]);
+        this.getPinsAndNets().put("neg", deviceLine[2]);
+    }
+
+    /**
+     * Reduces parameters of the device based on a map of parameters.
+     * @param params The map containing parameters to reduce.
+     * @return The reduced device object.
+     */
+    @Override
+    public Device reduceParams(Map<String, String> params) {
+        // Implement reduction logic specific to Esddiode if needed
+        return null;
     }
 
 
+
+    public int getNumberOfPins() {
+        return numberOfPins;
+    }
 }

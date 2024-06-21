@@ -29,4 +29,5 @@ XD1 GND PAD net18 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
 XD22 GND PAD net18 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
 XD7 PAD VDD net1 sub! esdvertpnp areapd=5.85e-11 perimpd=300.0000u nf=2
 XD17 GND PAD net18 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD18 PAD GND net18 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
 .ENDS
