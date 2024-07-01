@@ -31,7 +31,7 @@ public class Main {
 
         List<String> designDetails = netlistInfo.get("designDetails");
 
-        Graph graph = GraphFactory.buildGraph(nets, devices);
+        Graph graph = GraphFactory.buildGraph(devices);
 
         Reducer.reduce(graph);
 

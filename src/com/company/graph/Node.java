@@ -34,6 +34,19 @@ public class Node {
 
     private void setType (String type) {this.type = type;}
 
+    public Object getValue(){
+
+        String elementName = "";
+
+        if (type.equals("Device")){
+            return this.device;
+        } else if (type.equals("Net")) {
+            return this.net;
+        }
+
+        return elementName;
+    }
+
     public String toString(){
 
         String elementName = "";

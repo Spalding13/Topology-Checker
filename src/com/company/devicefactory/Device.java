@@ -5,6 +5,7 @@ import com.company.netFactory.Net;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Abstract class representing a generic device.
@@ -184,6 +185,19 @@ public abstract class Device {
      */
     public Map<String, String> getPinsAndNets() {
         return pinsAndNets;
+    }
+
+    /**
+     * This method returns a map of pin-net pairs where the nets are
+     * on the opposite end of the provided Net object
+     *
+     * @param oppositeNet The net to filter out.
+     * @return A map of pin-net pairs with nets different from the provided oppositeNet.
+     */
+    public Map<String, Net> getOppositeNets(Net oppositeNet) {
+        return this.pinNetMap.entrySet().stream()
+                .filter(entry -> !entry.getValue().equals(oppositeNet))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**

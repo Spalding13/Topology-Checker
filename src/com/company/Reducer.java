@@ -4,7 +4,10 @@ import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
 import com.company.graph.Connection;
 import com.company.graph.Graph;
+import com.company.graph.GraphFactory;
 import com.company.graph.Node;
+import com.company.netFactory.Net;
+import com.company.netFactory.NetFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +23,7 @@ public class Reducer {
     private static void parallelReduce(Graph topology) {
         // Initialize a set to track visited net nodes during traversal
         Set<Node> visited = new HashSet<>();
+        List<Device> reducedDevices = null;
 
         // Iterate over all net nodes in the graph
         for (Node netNode : topology.netNodeMap.values()) {
@@ -31,13 +35,15 @@ public class Reducer {
                 List<List<Device>> parallelDeviceGroups = exploreParallelDevices(topology, netNode, visited);
 
                 // Process parallel devices found during traversal
-                List<Device> reducedDevices = combineParallelDevices(parallelDeviceGroups);
+                reducedDevices = combineParallelDevices(parallelDeviceGroups);
 
                 System.out.println(parallelDeviceGroups);
                 System.out.println(reducedDevices);
                 System.out.println("Parallel and Reduced devices:");
             }
         }
+
+        topology = null;
     }
 
     private static List<List<Device>> exploreParallelDevices(Graph topology, Node netNode, Set<Node> visited) {
@@ -46,10 +52,23 @@ public class Reducer {
         // Retrieve connections of the current net node
         List<Connection> connections = topology.adjacencyList.get(netNode);
 
-        // Group devices by model name and pinsAndNets
+        // Group devices by model name and pinsAndNets, also mark visited nets on the opposite end
         Map<String, Map<String, List<Device>>> groupedDevices = connections.stream()
                 .flatMap(connection -> Stream.of(connection.getNode()))
-                .map(Node::getDevice)
+                .map(node -> {
+
+                    // Get the device in the node
+                    Device device = node.getDevice();
+
+                    // Get the net objects connected to the opposite pins of the device
+                    device.getOppositeNets((Net) netNode.getValue())
+                            .values()
+                            .forEach(oppositeNet -> {
+                                // Mark the opposite ends, as this is a parallel device
+                                visited.add(topology.getNetNodeByName(oppositeNet));
+                            });
+                    return device;
+                })
                 .collect(Collectors.groupingBy(Device::getModelName, // Group by model name
                         Collectors.groupingBy(device -> device.getPinsAndNets().toString()))); // Group by pinsAndNets
 

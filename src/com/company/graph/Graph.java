@@ -46,9 +46,9 @@ public class Graph {
      * @return The newly added node if successful, or null if the net already exists in the graph.
      */
     public Node addNetNode(Net net) {
-        if (netNodeMap.containsKey(net.name)) return null;
+        if (netNodeMap.containsKey(net.getName())) return null;
         Node newNode = new Node(null, net);
-        netNodeMap.put(net.name, newNode);
+        netNodeMap.put(net.getName(), newNode);
         List<Connection> connectionsList = new ArrayList<>();
         this.adjacencyList.put(newNode, connectionsList);
         return newNode;
@@ -74,7 +74,7 @@ public class Graph {
      * @return The net node, or null if not found.
      */
     public Node getNetNodeByName(Net net) {
-        return this.netNodeMap.get(net.name);
+        return this.netNodeMap.get(net.getName());
     }
 
     /**
@@ -110,11 +110,11 @@ public class Graph {
      * @return The removed node if successful, or null if the net does not exist in the graph.
      */
     public Node removeNetNode(Net net) {
-        Node nodeToRemove = netNodeMap.get(net.name);
+        Node nodeToRemove = netNodeMap.get(net.getName());
         if (nodeToRemove == null) return null;
         adjacencyList.remove(nodeToRemove);
         removeConnections(nodeToRemove);
-        return netNodeMap.remove(net.name);
+        return netNodeMap.remove(net.getName());
     }
 
     /**

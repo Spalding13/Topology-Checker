@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Net {
 
-    public String name;
+    private String name;
     private List<String> types;
     private List<Device> deviceList;
 
