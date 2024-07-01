@@ -21,60 +21,52 @@ public class Reducer {
     }
 
     private static void parallelReduce(Graph topology) {
-        // Initialize a set to track visited net nodes during traversal
-        Set<Node> visited = new HashSet<>();
-        List<Device> reducedDevices = null;
+        // Initialize a set to track visited devices during traversal
+        Set<Device> visitedDevices = new HashSet<>();
+
+        List<Device> reducedDevices = new ArrayList<>();
 
         // Iterate over all net nodes in the graph
         for (Node netNode : topology.netNodeMap.values()) {
 
-            // Perform parallel reduction from each unvisited net node
-            if (!visited.contains(netNode)) {
+            // Explore parallel devices connected to the current net node
+            List<List<Device>> parallelDeviceGroups = exploreParallelDevices(topology, netNode, visitedDevices);
 
-                // Explore parallel devices connected to the current net node
-                List<List<Device>> parallelDeviceGroups = exploreParallelDevices(topology, netNode, visited);
+            // Process parallel devices found during traversal
+            reducedDevices.addAll(combineParallelDevices(parallelDeviceGroups));
 
-                // Process parallel devices found during traversal
-                reducedDevices = combineParallelDevices(parallelDeviceGroups);
-
-                System.out.println(parallelDeviceGroups);
-                System.out.println(reducedDevices);
-                System.out.println("Parallel and Reduced devices:");
             }
-        }
 
-        topology = null;
+        topology = GraphFactory.buildGraph(reducedDevices);
     }
 
-    private static List<List<Device>> exploreParallelDevices(Graph topology, Node netNode, Set<Node> visited) {
+    private static List<List<Device>> exploreParallelDevices(Graph topology, Node netNode, Set<Device> visited) {
         System.out.println("Exploring devices connected to net node: " + netNode.toString());
 
         // Retrieve connections of the current net node
         List<Connection> connections = topology.adjacencyList.get(netNode);
 
-        // Group devices by model name and pinsAndNets, also mark visited nets on the opposite end
         Map<String, Map<String, List<Device>>> groupedDevices = connections.stream()
                 .flatMap(connection -> Stream.of(connection.getNode()))
                 .map(node -> {
-
-                    // Get the device in the node
                     Device device = node.getDevice();
 
-                    // Get the net objects connected to the opposite pins of the device
-                    device.getOppositeNets((Net) netNode.getValue())
-                            .values()
-                            .forEach(oppositeNet -> {
-                                // Mark the opposite ends, as this is a parallel device
-                                visited.add(topology.getNetNodeByName(oppositeNet));
-                            });
+                    if (device == null || visited.contains(device)) {
+                        return null; // Skip this device in the stream
+                    }
+
+                    visited.add(device);
                     return device;
                 })
-                .collect(Collectors.groupingBy(Device::getModelName, // Group by model name
-                        Collectors.groupingBy(device -> device.getPinsAndNets().toString()))); // Group by pinsAndNets
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(
+                        Device::getModelName,
+                        Collectors.groupingBy(
+                                device -> device.getPinsAndNets().toString()
+                        )));
 
-        // Extract the values (list of devices) from the nested map
         List<List<Device>> separatedGroups = groupedDevices.values().stream()
-                .flatMap(innerMap -> innerMap.values().stream()) // Flatten the inner map values
+                .flatMap(innerMap -> innerMap.values().stream())
                 .collect(Collectors.toList());
 
         // Print the separated groups of devices
