@@ -7,10 +7,10 @@ import java.util.function.BiFunction;
 public class DeviceFactory {
 
     // Map to store devices grouped by their types
-    private static Map<String, List<Device>> deviceByType = new HashMap<>();
+    private static final Map<String, List<Device>> deviceByType = new HashMap<>();
 
     // Map to store devices by their names for easy lookup
-    private static Map<String, Device> deviceByName = new HashMap<>();
+    private static final Map<String, Device> deviceByName = new HashMap<>();
 
     // Map to associate device type identifiers with their constructors
     private static final Map<String, BiFunction<String, Device, Device>> deviceConstructorMap = new HashMap<>();
@@ -144,6 +144,7 @@ public class DeviceFactory {
      * @return The created Device.
      */
     private static Device createDevice(String line) {
+
         for (Map.Entry<String, BiFunction<String, Device, Device>> entry : deviceConstructorMap.entrySet()) {
             if (line.contains(entry.getKey())) {
                 return entry.getValue().apply(line, null);
