@@ -1,7 +1,9 @@
 package com.company.devicefactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class representing an Esddiode device, extending from Device.
@@ -31,7 +33,7 @@ public class Esddiode extends Device {
     public Esddiode(Device device) {
         super(device.getDeviceType(), device.getName(), device.getModelName());
 
-        this.getPinsAndNets().putAll(device.getPinsAndNets()); // Example of combining pins and nets
+        this.getPinsAndNets().putAll(device.getPinsAndNets()); // Example of combining pins and nets4
         // Additional initialization specific to Esddiode
     }
 
@@ -45,20 +47,34 @@ public class Esddiode extends Device {
         this.getPinsAndNets().put("neg", deviceLine[2]);
     }
 
-    /**
-     * Reduces parameters of the device based on a map of parameters.
-     * @param params The map containing parameters to reduce.
-     * @return The reduced device object.
-     */
     @Override
-    public Device reduceParams(Map<String, String> params) {
-        // Implement reduction logic specific to Esddiode if needed
-        return null;
-    }
+    public Map<String, String> recalculateParallelParams(List<Map<String, String>> params) {
+        // Initialize accumulators
+        AtomicInteger totalNf = new AtomicInteger();
+        double totalAreapd = 0.0;
+        double totalPerimpd = 0.0;
 
+        // Sum up the values
+        for (Map<String, String> paramMap : params) {
+            for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
 
+                // Add more cases if there are other parameters to reduce
+                switch (key) {
+                    case "nf" -> totalNf.addAndGet(Integer.parseInt(value));
+                    case "areapd" -> totalAreapd += Double.parseDouble(value);
+                    case "perimpd" -> totalPerimpd += Device.parseScientificNotation(value);
+                }
+            }
+        }
 
-    public int getNumberOfPins() {
-        return numberOfPins;
+        // Create a new map for the reduced parameters
+        Map<String, String> reducedParams = new HashMap<>();
+        reducedParams.put("nf", Integer.toString(totalNf.get()));
+        reducedParams.put("areapd", Double.toString(totalAreapd));
+        reducedParams.put("perimpd", Double.toString(totalPerimpd));
+
+        return reducedParams;
     }
 }

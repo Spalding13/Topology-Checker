@@ -5,6 +5,7 @@ import com.company.netFactory.Net;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -250,7 +251,17 @@ public abstract class Device {
         this.params.clear();
     }
 
-    public abstract Device reduceParams(Map<String, String> params);
+    public abstract Map<String, String> recalculateParallelParams(List<Map<String, String>> params);
+
+    /**
+     * Helper method to parse scientific notation strings like "2.925e-11" and "150.00000u".
+     */
+    protected static double parseScientificNotation(String value) {
+        if (value.endsWith("u")) {  // Handle micro (u) suffix
+            value = value.replace("u", "e-6");
+        }
+        return Double.parseDouble(value);
+    }
 
     @Override
     public boolean equals(Object o) {

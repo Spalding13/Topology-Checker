@@ -46,6 +46,6 @@ public class Main {
 //            System.out.println(" PRINTING DEVICES -> " + device.deviceName + device.params);
 //        }
 
-        //graph.printGraph();
+        graph.printGraph();
     }
 }

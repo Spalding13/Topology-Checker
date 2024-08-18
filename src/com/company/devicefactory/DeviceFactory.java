@@ -71,11 +71,25 @@ public class DeviceFactory {
         }
         combinedDevice.setPinsAndNets(combinedPinsAndNets);
 
+
         // Set the pinNetMap for the combined device (use the pinNetMap of the first device)
         combinedDevice.setPinNetMap(devices.get(0).getPinNetMap());
 
+        combinedDevice.setParams(combineParameters(devices));
+
         // Return the combined device
         return combinedDevice;
+    }
+
+    private static Map<String, String> combineParameters(List<Device> devices){
+
+        List<Map<String, String>> deviceParamMaps = new ArrayList<>();
+
+        for (Device device : devices) {
+            deviceParamMaps.add(device.getParams());
+        }
+
+        return devices.get(0).recalculateParallelParams(deviceParamMaps);
     }
 
     /**
@@ -110,8 +124,8 @@ public class DeviceFactory {
         // Initialize a local map to accumulate devices by type
         Map<String, List<Device>> deviceByTypeLocal = new ConcurrentHashMap<>();
 
-        // Iterate through each device line in parallel
-        deviceLines.parallelStream().forEach(line -> {
+        // Iterate through each device line
+        deviceLines.forEach(line -> {
             // Extract the device type and create the device
             Device device = createDevice(line);
 
@@ -119,20 +133,12 @@ public class DeviceFactory {
             deviceByTypeLocal.computeIfAbsent(device.getDeviceType(), k -> new ArrayList<>()).add(device);
 
             // Add the device to the map of devices by name
-            synchronized (DeviceFactory.class) {
-                deviceByName.put(device.getName(), device);
-            }
+            deviceByName.put(device.getName(), device);
 
             // Add the device to the list of devices
             devices.add(device);
         });
 
-        // Merge the local deviceByType map with the global deviceByType map
-        synchronized (DeviceFactory.class) {
-            deviceByTypeLocal.forEach((type, list) ->
-                    deviceByType.computeIfAbsent(type, k -> new ArrayList<>()).addAll(list)
-            );
-        }
 
         // Return the list of created devices
         return devices;
