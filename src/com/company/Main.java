@@ -19,7 +19,6 @@ public class Main {
         // Read .cdl input file in to a string
         String input = NetlistReader.openFile("E:\\ESD Checks\\input\\netlist.cdl");
 
-
         // Parse input string
         // netlistInfo => "devices", "nets", "designDetails"
         Map<String, List<String>> netlistInfo = StateMachine.parseNetlist(input);
@@ -33,7 +32,7 @@ public class Main {
 
         Graph graph = GraphFactory.buildGraph(devices);
 
-        Reducer.reduce(graph);
+        graph = Reducer.reduce(graph);
 
 
 
@@ -46,5 +45,7 @@ public class Main {
 //        for (Device device: devices){
 //            System.out.println(" PRINTING DEVICES -> " + device.deviceName + device.params);
 //        }
+
+        //graph.printGraph();
     }
 }

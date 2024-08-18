@@ -90,6 +90,7 @@ public class DeviceFactory {
         } else {
             return devices.stream()
                     .map(Device::getName)
+                    .sorted() // Sort names in ascending order
                     .reduce((name1, name2) -> name1 + "_" + name2) // Concatenate names with "_"
                     .orElse("");  // Handle empty list case by providing a default value
         }

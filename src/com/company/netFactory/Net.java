@@ -52,4 +52,9 @@ public class Net {
         return sb.substring(0, sb.length() - 1);
 
     }
+
+    @Override
+    public String toString(){
+        return this.getName();
+    }
 }

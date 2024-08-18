@@ -1,8 +1,6 @@
 package com.company.graph;
 
 import com.company.devicefactory.Device;
-import com.company.graph.Connection;
-import com.company.graph.Node;
 import com.company.netFactory.Net;
 
 import java.util.*;
@@ -12,18 +10,18 @@ import java.util.*;
  */
 public class Graph {
 
-    // Maps to store nodes by name
+    // Maps to store nodes by name with non-thread-safe implementations
     public Map<String, Node> deviceNodeMap = new HashMap<>();
     public Map<String, Node> netNodeMap = new HashMap<>();
 
     // Adjacency list to store connections between nodes
-    public Map<Node, List<Connection>> adjacencyList;
+    public Map<Node, List<Connection>> adjacencyList = new HashMap<>();
 
     /**
      * Constructs a new Graph object.
      */
     public Graph() {
-        this.adjacencyList = new LinkedHashMap<>();
+        // No need to initialize adjacencyList in the constructor, it's already done above
     }
 
     /**
@@ -32,12 +30,12 @@ public class Graph {
      * @return The newly added node if successful, or null if the device already exists in the graph.
      */
     public Node addDeviceNode(Device device) {
-        if (deviceNodeMap.containsKey(device.getName())) return null;
         Node newNode = new Node(device, null);
-        deviceNodeMap.put(device.getName(), newNode);
-        List<Connection> connectionsList = new ArrayList<>();
-        this.adjacencyList.put(newNode, connectionsList);
-        return newNode;
+        return deviceNodeMap.computeIfAbsent(device.getName(), k -> {
+            List<Connection> connectionsList = new ArrayList<>();
+            adjacencyList.put(newNode, connectionsList);
+            return newNode;
+        });
     }
 
     /**
@@ -46,12 +44,12 @@ public class Graph {
      * @return The newly added node if successful, or null if the net already exists in the graph.
      */
     public Node addNetNode(Net net) {
-        if (netNodeMap.containsKey(net.getName())) return null;
         Node newNode = new Node(null, net);
-        netNodeMap.put(net.getName(), newNode);
-        List<Connection> connectionsList = new ArrayList<>();
-        this.adjacencyList.put(newNode, connectionsList);
-        return newNode;
+        return netNodeMap.computeIfAbsent(net.getName(), k -> {
+            List<Connection> connectionsList = new ArrayList<>();
+            adjacencyList.put(newNode, connectionsList);
+            return newNode;
+        });
     }
 
     /**
@@ -61,15 +59,14 @@ public class Graph {
      * @param pin The pin connecting the nodes.
      */
     public void addEdge(Node n1, Node n2, String pin) {
-        Connection connection1 = new Connection(n2, pin);
-        this.adjacencyList.get(n1).add(connection1);
-        Connection connection2 = new Connection(n1, pin);
-        this.adjacencyList.get(n2).add(connection2);
+        adjacencyList.computeIfAbsent(n1, k -> new ArrayList<>())
+                .add(new Connection(n2, pin));
+        adjacencyList.computeIfAbsent(n2, k -> new ArrayList<>())
+                .add(new Connection(n1, pin));
     }
 
     /**
      * Retrieves the net node associated with the given net.
-     *
      * @param net The net.
      * @return The net node, or null if not found.
      */
@@ -84,10 +81,14 @@ public class Graph {
      * @param pin The pin connecting the nodes.
      */
     public void removeEdge(Node n1, Node n2, String pin) {
-        List<Connection> connections1 = this.adjacencyList.get(n1);
-        List<Connection> connections2 = this.adjacencyList.get(n2);
-        connections1.removeIf(connection -> connection.getNode().equals(n2) && connection.getPin().equals(pin));
-        connections2.removeIf(connection -> connection.getNode().equals(n1) && connection.getPin().equals(pin));
+        List<Connection> connections1 = adjacencyList.get(n1);
+        List<Connection> connections2 = adjacencyList.get(n2);
+        if (connections1 != null) {
+            connections1.removeIf(connection -> connection.getNode().equals(n2) && connection.getPin().equals(pin));
+        }
+        if (connections2 != null) {
+            connections2.removeIf(connection -> connection.getNode().equals(n1) && connection.getPin().equals(pin));
+        }
     }
 
     /**
@@ -96,12 +97,11 @@ public class Graph {
      * @return The removed node if successful, or null if the device does not exist in the graph.
      */
     public Node removeDeviceNode(Device device) {
-        Node nodeToRemove = deviceNodeMap.get(device.getName());
+        Node nodeToRemove = deviceNodeMap.remove(device.getName());
         if (nodeToRemove == null) return null;
         adjacencyList.remove(nodeToRemove);
         removeConnections(nodeToRemove);
-
-        return deviceNodeMap.remove(device.getName());
+        return nodeToRemove;
     }
 
     /**
@@ -110,11 +110,11 @@ public class Graph {
      * @return The removed node if successful, or null if the net does not exist in the graph.
      */
     public Node removeNetNode(Net net) {
-        Node nodeToRemove = netNodeMap.get(net.getName());
+        Node nodeToRemove = netNodeMap.remove(net.getName());
         if (nodeToRemove == null) return null;
         adjacencyList.remove(nodeToRemove);
         removeConnections(nodeToRemove);
-        return netNodeMap.remove(net.getName());
+        return nodeToRemove;
     }
 
     /**
@@ -126,6 +126,10 @@ public class Graph {
             connections.removeIf(connection -> connection.getNode().equals(node));
         }
     }
+
+    /**
+     * Prints the graph structure.
+     */
     public void printGraph() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\n--------Graph--------: \n");
@@ -140,5 +144,6 @@ public class Graph {
         stringBuilder.append("\n---------------------");
         System.out.println(stringBuilder.toString());
     }
+
     // Other methods...
 }

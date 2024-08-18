@@ -6,14 +6,10 @@ import com.company.graph.Connection;
 import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
 import com.company.graph.Node;
-import com.company.netFactory.Net;
-import com.company.netFactory.NetFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**The Reducer class is responsible
  * for reducing the complexity of a Graph
@@ -25,129 +21,81 @@ import java.util.stream.Stream;
  * need to be processed efficiently.**/
 public class Reducer {
 
-    public static void reduce(Graph topology) {
-        // Implementation for reduce method
-        parallelReduce(topology);
+    public static Graph reduce(Graph topology) {
+        // Implementation for parallel reduce method
+        topology = parallelReduce(topology);
+
+        return topology;
     }
 
-    private static void parallelReduce(Graph topology) {
-        // Use a thread-safe set for tracking visited devices
-        ConcurrentMap<Device, Boolean> visitedDevices = new ConcurrentHashMap<>();
-
+    public static Graph parallelReduce(Graph topology) {
         long startTime = System.nanoTime();
 
-        // Create a thread-safe list for storing reduced devices
-        Graph finalTopology_temp  = topology;
-        List<Device> reducedDevices = topology.netNodeMap.values().parallelStream()
-                .flatMap(netNode -> {
-                    // Retrieve connections for each net node
-                    List<Connection> connections = finalTopology_temp.adjacencyList.get(netNode);
-                    System.out.println("Exploring devices connected to net node: " + netNode);
+        // Perform local reductions in parallel for each NetNode
+        // Here use either parallel stream or regular stream of nets
 
-                    // Explore and group devices in parallel
-                    List<List<Device>> parallelDeviceGroups = exploreParallelDevices(connections, visitedDevices);
+        Set<String> visitedDevices = ConcurrentHashMap.newKeySet();
 
-                    // Combine parallel devices
-                    return combineParallelDevices(parallelDeviceGroups).stream();
-                })
-                .collect(Collectors.toList()); // Collect all results into a single list
+        Graph topology_temp = topology;
+        List<Device> reducedDevices =
+                topology.netNodeMap.values().stream()
+                        .flatMap(netNode -> parallelCollector(topology_temp, netNode, visitedDevices).stream())
+                        //.distinct() // Ensure devices are unique. Can be explored in future version
+                        .collect(Collectors.toList());
 
-        System.out.println(finalTopology_temp.adjacencyList.size());
-
+        // Benchmark performance
         long endTime = System.nanoTime();
-        long durationStream = endTime - startTime;
-        System.out.println("Time taken with parallelStream(): " + durationStream + " nanoseconds");
+        long duration = endTime - startTime;
 
-
-        // Rebuild the graph with reduced devices
+        // Directly update topology
         topology = GraphFactory.buildGraph(reducedDevices);
+
+        System.out.printf("Total amount of devices: %d%n", reducedDevices.size());
+        System.out.println("Time taken with parallel parallelCollector(): " + duration + " nanoseconds");
+
+        return topology;
     }
 
-    private static List<List<Device>> exploreParallelDevices(List<Connection> connections, ConcurrentMap<Device, Boolean> visited) {
-        // Group devices by ModelName and PinsAndNets concurrently
-        ConcurrentMap<String, ConcurrentMap<String, List<Device>>> groupedDevices = connections.parallelStream()
+    private static List<Device> parallelCollector(Graph topology, Node netNode, Set<String> visitedDevices) {
+        // Retrieve the list of connections for the given net node
+        List<Connection> connections = topology.adjacencyList.get(netNode);
+
+        // Collect devices, ensuring they haven't been visited before
+        List<Device> localDevices = connections.stream()
                 .map(Connection::getNode)
                 .map(Node::getDevice)
-                .filter(device -> device != null && visited.putIfAbsent(device, Boolean.TRUE) == null) // Filter and mark as visited
-                .collect(Collectors.groupingByConcurrent(
+                .filter(device -> device != null && visitedDevices.add(device.getName()))
+                .collect(Collectors.toList());
+
+        // Group devices by model name and pins/nets
+        Map<String, Map<String, List<Device>>> groupedDevices = localDevices.stream()
+                .collect(Collectors.groupingBy(
                         Device::getModelName,
-                        Collectors.groupingByConcurrent(device -> device.getPinsAndNets().toString())
+                        Collectors.groupingBy(
+                                device -> device.getPinsAndNets().toString(),
+                                Collectors.toList()
+                        )
                 ));
 
-        // Flatten the grouped devices into a list of device groups
-        return groupedDevices.values().stream()
-                .flatMap(innerMap -> innerMap.values().stream())
-                .collect(Collectors.toList());
+        // Combine and return devices within each group
+        return combineParallelDevices(groupedDevices.values().stream()
+                .flatMap(pinGroups -> pinGroups.values().stream())
+                .collect(Collectors.toList()));
     }
 
+
     private static List<Device> combineParallelDevices(List<List<Device>> parallelGroups) {
-        // Logic to combine parallel devices into one representative device
-        // For example, merge attributes or take an average of values
-        // This logic will depend on the specific requirements of your application
-        // Return the combined representative device
-
-        List<Device> reducedDevices = new ArrayList<>();
-
-        // Iterate through each group
-        for (List<Device> group : parallelGroups) {
-
-            // A single device can't be reduced by the next algorithms
-            // add it to the collection anyway and skip to next iteration
-            if (group.size() == 1){
-                reducedDevices.add(group.get(0));
-                continue;
-            }
-
-            // Use the first device in the group to determine the device type
-            if (!group.isEmpty()) {
+        return parallelGroups.stream().map(group -> {
+            if (group.size() == 1) {
+                return group.get(0);
+            } else {
+                // Use the first device in the group to determine the device type
                 Device firstDevice = group.get(0);
-
                 String deviceType = firstDevice.getDeviceType();
 
                 // Use the factory class to create a combined device of the same type
-                Device combinedDevice = DeviceFactory.createCombinedDevice(group, deviceType);
-
-
-                reducedDevices.add(combinedDevice);
+                return DeviceFactory.createCombinedDevice(group, deviceType);
             }
-        }
-
-        return reducedDevices;
+        }).collect(Collectors.toList());
     }
-
-    private static void calculateParameters(Device device) {
-        // Implement logic to calculate additional parameters for the representative device
-        // This could involve computing parameters based on the combined attributes of the devices
-    }
-
-
-    private static String convertPropsToCriteria(Node node) {
-        // Build a criteria for parallelism
-        String connectionsString = node.device.getPinNetMapString();
-        String name = node.device.getModelName();
-
-        return name + "_" + connectionsString;
-    }
-
-    private static void processParallelDevices(List<Node> parallelDevices) {
-        // Process the list of parallel devices (e.g., combine them into one)
-        // Implement your logic here based on the requirements
-    }
-
-    private static String convertConnectionsToString(List<Connection> connections) {
-        return connections.stream()
-                .map(Connection::toString)
-                .collect(Collectors.joining());
-    }
-
-    private static boolean equalTypes(String type1, String type2) {
-
-        return type1.equals(type2);
-    }
-
-    private static boolean detectSeries(Device device) {
-        // Implementation for detectSeries method
-        return true;
-    }
-
 }

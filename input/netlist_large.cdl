@@ -91,4 +91,121 @@ XD33 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
 XD34 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
 XD35 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
 XD36 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
 .ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_5
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_5 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD37 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD38 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD39 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD40 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD41 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD42 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD43 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD44 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_6
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_6 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD45 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD46 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD47 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD48 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD49 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD50 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD51 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD52 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_7
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_7 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD53 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD54 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD55 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD56 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD57 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD58 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD59 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD60 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_8
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_8 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD61 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD62 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD63 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD64 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD65 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD66 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD67 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD68 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_9
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_9 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD69 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD70 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD71 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD72 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD73 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD74 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD75 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD76 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+******************************************************
+*Library Name: HBM_testcases
+*Cell Name: parallel_reduce_expanded_10
+*View Name: schematic
+******************************************************
+
+.SUBCKT parallel_reduce_expanded_10 GND PAD VDD
+*.PININFO GND:I PAD:I VDD:I
+XD77 GND PAD net34 sub! esddiode areapd=2.825e-11 perimpd=140.00000u nf=1
+XD78 PAD VDD net11 sub! esdvertpnp areapd=6.55e-11 perimpd=310.0000u nf=2
+XD79 GND PAD net35 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=2
+XD80 PAD GND net36 sub! esddiode areapd=3.125e-11 perimpd=170.00000u nf=1
+XD81 GND PAD net37 sub! esdvertpnp areapd=7.05e-11 perimpd=330.0000u nf=3
+XD82 PAD VDD net12 sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD83 GND PAD net38 sub! esdvertpnp areapd=6.95e-11 perimpd=320.0000u nf=2
+XD84 PAD VDD net13 sub! esddiode areapd=3.025e-11 perimpd=160.00000u nf=1
+
+.ENDS
+
+

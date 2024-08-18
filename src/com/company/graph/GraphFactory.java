@@ -74,6 +74,8 @@ public class GraphFactory {
                     if(netNode==null) netNode = graph.getNetNodeByName(net);
                     graph.addEdge(deviceNode, netNode, pin);
                 }
+            } else {
+                System.out.println("device node already added!" + device.getName());
             }
         }
     }

@@ -2,8 +2,11 @@ package com.company.devicefactory;
 
 import com.company.netFactory.Net;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -14,6 +17,7 @@ public abstract class Device {
 
     // Fields common to all devices
     private int numberOfPins;
+    private String id;
     private String deviceType;
     private String name;
     private String modelName;
@@ -31,7 +35,6 @@ public abstract class Device {
         this.deviceType = deviceType;
         this.name = name;
         this.modelName = modelName;
-
     }
 
     /**
@@ -248,4 +251,17 @@ public abstract class Device {
     }
 
     public abstract Device reduceParams(Map<String, String> params);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Device device = (Device) o;
+        return Objects.equals(name, device.name) && Objects.equals(pinsAndNets, device.pinsAndNets);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, pinsAndNets);
+    }
 }
