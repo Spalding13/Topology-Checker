@@ -1,46 +1,39 @@
 package com.company;
 
-import com.company.devicefactory.Device;
-import com.company.netFactory.Net;
-
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class StateMachine {
 
     // Design info section:
-    private static final Pattern startPt = Pattern.compile(".*auCdl Netlist:.*");
-    private static final Pattern designLinePt = Pattern.compile("\\*[A-Z].* *");
+    private Pattern startPt = Pattern.compile(".*auCdl Netlist:.*");
+    private Pattern designLinePt = Pattern.compile("\\*[A-Z].* *");
 
     // Devices section:
-    private static final Pattern devicePt = Pattern.compile("^[A-Z]+[0-9]+");
-    private static final Pattern deviceParamsPt = Pattern.compile("^\\+.*");
-
-    // Input
-    private static String[] lines;
+    private Pattern devicePt = Pattern.compile("^[A-Z]+[0-9]+");
+    private Pattern deviceParamsPt = Pattern.compile("^\\+.*");
 
     // Output
-    private static final Map< String, List<String> > netlistInfo = new HashMap<>();
+    private Map<String, List<String>> netlistInfo = new HashMap<>();
 
-    private static List<String> designDetails = new ArrayList<>();
-    private static List<String> devices = new ArrayList<>();
-    private static List<String> nets = new ArrayList<>();
+    private List<String> designDetails = new ArrayList<>();
+    private List<String> devices = new ArrayList<>();
+    private List<String> nets = new ArrayList<>();
 
-    public static Map< String, List<String> > parseNetlist(String netlist) {
+    // Constructor
+    public StateMachine() {
+        // Initialize patterns or any other setup if needed
+    }
 
-        lines = netlist.split("\n");
+    // Main parsing method
+    public Map<String, List<String>> parseNetlist(String netlist) {
+        String[] lines = netlist.split("\n");
 
         for (int i = 0; i < lines.length; i++) {
-
             if (startPt.matcher(lines[i]).find()) {
-
-                i = parseDesignDetails(i + 2);
-
+                i = parseDesignDetails(lines, i + 2);
             } else if (devicePt.matcher(lines[i]).find()) {
-                //parseNets(i);
-                i = parseDeviceParams(i);
-
+                i = parseDeviceParams(lines, i);
             }
         }
 
@@ -51,33 +44,22 @@ public class StateMachine {
         return netlistInfo;
     }
 
-
-    private static int parseDeviceParams(int i) {
-
-
+    private int parseDeviceParams(String[] lines, int i) {
         int currentLineIdx = i;
-
         String deviceLine = "";
 
-
-
         while (currentLineIdx < lines.length && devicePt.matcher(lines[currentLineIdx]).find()) {
-            //System.out.println("DEVICE LINE - > " + deviceLine);
-
-            parseNets(currentLineIdx);
+            parseNets(lines, currentLineIdx);
 
             deviceLine = lines[currentLineIdx]
                     .replaceAll("\\r", "")
                     .replaceAll(" $", "");
 
-            // Add parameters on next line until we encounter another device
             while (currentLineIdx + 1 < lines.length && deviceParamsPt.matcher(lines[currentLineIdx + 1]).find()) {
                 deviceLine = deviceLine.concat(lines[currentLineIdx + 1]
                         .replaceAll("^\\+", "")
                         .replaceAll("\\r", ""));
                 currentLineIdx++;
-
-
             }
             devices.add(deviceLine);
             currentLineIdx++;
@@ -85,34 +67,26 @@ public class StateMachine {
         return currentLineIdx;
     }
 
-    private static void parseNets(int i) {
-
-        // We always assume that all nets will be on the same line for every device
+    private void parseNets(String[] lines, int i) {
         List<String> deviceModels = Arrays.asList("esddiode", "esdvertpnp");
-
         String[] currentLine = lines[i].split(" ");
 
-        for(int j = 1; j < currentLine.length; j++ ){
+        for (int j = 1; j < currentLine.length; j++) {
             String token = currentLine[j];
-            // Make sure we don't add anything other than nets
-            if(deviceModels.contains(token)) {
-                // If we encounter a model, then we added all nets
-
+            if (deviceModels.contains(token)) {
                 break;
             } else {
-                if(!nets.contains(token)){
+                if (!nets.contains(token)) {
                     nets.add(token);
                 }
             }
         }
     }
 
-    private static int parseDesignDetails(int i) {
-
+    private int parseDesignDetails(String[] lines, int i) {
         String currentDesignDetail;
 
         while (i < lines.length && designLinePt.matcher(lines[i]).find()) {
-
             currentDesignDetail = lines[i]
                     .replaceAll("\\r", "")
                     .replaceAll("^\\* ", "")

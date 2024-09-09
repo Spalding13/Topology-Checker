@@ -1,0 +1,2 @@
+XD1_ptrn GND_gnd PAD net18_misc sub! esddiode areapd=2.925e-11 perimpd=150.00000u nf=1
+XD2_ptrn PAD_io VDD_gnd net1_misc sub! esdvertpnp areapd=5.85e-11 perimpd=300.0000u nf=1

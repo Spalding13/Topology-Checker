@@ -15,7 +15,7 @@ public class GraphFactory {
     /**
      * Builds the graph data structure.
      *
-//     * @param nets    List of nets
+    //
      * @param devices List of devices
      * @return The constructed graph
      */

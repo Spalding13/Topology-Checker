@@ -1,10 +1,9 @@
-package com.company.EsdRules;
+package com.company.esd.result;
 
 public class EsdRuleResult {
     private String ruleName;
     private boolean isViolated;
-    private String description; // Details about the violation or success
-    // Add more fields if needed
+    private String description;
 
     public EsdRuleResult(String ruleName, boolean isViolated, String description) {
         this.ruleName = ruleName;

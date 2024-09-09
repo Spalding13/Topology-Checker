@@ -2,6 +2,7 @@ package com.company;
 
 import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
+import com.company.esd.rule.EsdaRule;
 import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
 import com.company.netFactory.Net;
@@ -21,8 +22,8 @@ public class Main {
 
         // Parse input string
         // netlistInfo => "devices", "nets", "designDetails"
-        Map<String, List<String>> netlistInfo = StateMachine.parseNetlist(input);
-
+        StateMachine stateMachine = new StateMachine();
+        Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
         // Object creation section
         List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
 
@@ -33,6 +34,10 @@ public class Main {
         Graph graph = GraphFactory.buildGraph(devices);
 
         graph = Reducer.reduce(graph);
+
+        EsdaRule rule = new EsdaRule();
+
+        System.out.println("test");
 
 
 

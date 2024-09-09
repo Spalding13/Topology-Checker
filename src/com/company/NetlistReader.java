@@ -4,7 +4,7 @@ import java.io.*;
 
 public class NetlistReader {
 
-    static String openFile(String filePath) throws IOException {
+    public static String openFile(String filePath) throws IOException {
         FileReader fr = new FileReader(filePath);
 
         try {
