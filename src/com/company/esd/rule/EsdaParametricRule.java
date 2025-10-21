@@ -15,4 +15,9 @@ public class EsdaParametricRule extends AbstractParametricRule {
 
 
     }
+
+    @Override
+    public String getDescription() {
+        return "";
+    }
 }

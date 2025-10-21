@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface StructuralRule {
     EsdRuleResult analyze(Graph graph, List<String> ports);
+    Graph getPattern(); // Method to get the pattern graph for this rule
+
+    String getDescription();
 }

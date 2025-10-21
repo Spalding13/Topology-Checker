@@ -47,6 +47,16 @@ public class Node {
         return elementName;
     }
 
+    public Net getNet(){
+
+
+        if (type.equals("Net")) {
+            return this.net;
+        }
+
+        return null;
+    }
+
     public String toString(){
 
         String elementName = "";

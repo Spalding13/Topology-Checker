@@ -40,4 +40,14 @@ public class EsdaRule extends AbstractStructuralRule {
 
         return new EsdRuleResult("ESDA Rule", isViolated, description);
     }
+
+    @Override
+    public Graph getPattern() {
+        return this.esda_pattern;
+    }
+
+    @Override
+    public String getDescription() {
+        return this.description;
+    }
 }

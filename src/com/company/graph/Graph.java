@@ -25,6 +25,27 @@ public class Graph {
     }
 
     /**
+     * Retrieves all nodes in the graph.
+     * @return A collection of all nodes in the graph.
+     */
+    public Collection<Node> getNodes() {
+        Set<Node> allNodes = new HashSet<>();
+        allNodes.addAll(deviceNodeMap.values());
+        allNodes.addAll(netNodeMap.values());
+        return allNodes;
+    }
+
+    /**
+     * Retrieves the connections associated with a specific node.
+     *
+     * @param node The node whose connections are to be retrieved.
+     * @return A list of connections associated with the node, or an empty list if none are found.
+     */
+    public List<Connection> getConnections(Node node) {
+        return adjacencyList.getOrDefault(node, Collections.emptyList());
+    }
+
+    /**
      * Adds a device node to the graph.
      * @param device The device to be added as a node.
      * @return The newly added node if successful, or null if the device already exists in the graph.
@@ -146,5 +167,21 @@ public class Graph {
     }
 
 
-    // Other methods...
+    /**
+     * Retrieves a mapping of net names to their corresponding Net objects
+     * from all net nodes in the graph.
+     *
+     * @return A map where the key is the net name (String) and the value is the Net object.
+     */
+    public Map<String, Net> getNetMap() {
+        Map<String, Net> netMap = new HashMap<>();
+        for (Map.Entry<String, Node> entry : netNodeMap.entrySet()) {
+            Node node = entry.getValue();
+            if (node != null && node.getNet() != null) {
+                netMap.put(entry.getKey(), node.getNet());
+            }
+        }
+        return netMap;
+    }
+
 }

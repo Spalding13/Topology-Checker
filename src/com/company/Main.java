@@ -2,7 +2,10 @@ package com.company;
 
 import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
+import com.company.esd.analyzer.ESDAnalyzer;
+import com.company.esd.rule.AbstractStructuralRule;
 import com.company.esd.rule.EsdaRule;
+import com.company.esd.rule.StructuralRule;
 import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
 import com.company.netFactory.Net;
@@ -15,42 +18,41 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        // Enlist all available ports
+        // Step 1: Define ports
         List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
-        // Read .cdl input file in to a string
-        String input = NetlistReader.openFile("E:\\ESD Checks\\input\\netlist.cdl");
 
-        // Parse input string
-        // netlistInfo => "devices", "nets", "designDetails"
+        // Step 2: Read the .cdl input file into a string
+        String inputPath = "E:\\ESD Checks\\input\\netlist.cdl";
+        String input = NetlistReader.openFile(inputPath);
+
+        // Step 3: Parse the netlist using StateMachine
         StateMachine stateMachine = new StateMachine();
+        assert input != null;
         Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
-        // Object creation section
-        List<Net> nets = NetFactory.createNets(netlistInfo.get("nets"));
+
+        // Step 4: Create nets and devices from parsed information
+        NetFactory netFactory = new NetFactory();
+        List<Net> nets = netFactory.createNets(netlistInfo.get("nets"));
 
         List<Device> devices = DeviceFactory.createDevicesFromLines(netlistInfo.get("devices"));
 
-        List<String> designDetails = netlistInfo.get("designDetails");
+        // Step 5: Build the graph using GraphFactory
+        Graph graph = GraphFactory.buildGraph(devices, netFactory.getNetMap());
 
-        Graph graph = GraphFactory.buildGraph(devices);
-
+        // Step 6: Reduce the graph to simplify its structure
         graph = Reducer.reduce(graph);
 
+        // Step 7: Create ESD rules
         EsdaRule rule = new EsdaRule();
+        List<StructuralRule> rules = new ArrayList<>();
+        rules.add(rule);
 
-        System.out.println("test");
-
-
-
-//        For testing purposes
-
-//        for (Net net: nets){
-//            System.out.println(" PRINTING NETS -> " + net.name);
-//        }
-//
-//        for (Device device: devices){
-//            System.out.println(" PRINTING DEVICES -> " + device.deviceName + device.params);
-//        }
-
-        graph.printGraph();
+        System.out.println("Testing rule application...");
+        // Uncomment and customize below when integrating rule analysis
+        ESDAnalyzer analyzer = new ESDAnalyzer(rules);
+        analyzer.analyze(graph, ports);
+        
     }
+
+
 }

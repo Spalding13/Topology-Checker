@@ -24,18 +24,26 @@ public abstract class AbstractStructuralRule implements StructuralRule {
     }
 
     protected Graph initializePattern() throws IOException {
-
-        // netlistInfo => "devices", "nets", "designDetails"
+        // Step 1: Parse the input netlist file
+        String inputPath = "E:\\ESD Checks\\input\\esda_ptrn.cdl";
         StateMachine stateMachine = new StateMachine();
+        String input = NetlistReader.openFile(inputPath);
 
-        String input = NetlistReader.openFile("E:\\ESD Checks\\input\\esda_ptrn.cdl");
-
+        // Step 2: Extract netlist information
         Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
 
+        // Step 3: Create nets and generate a map of nets
+        NetFactory netFactory = new NetFactory();
+        List<Net> nets = netFactory.createNets(netlistInfo.get("nets"));
+        Map<String, Net> netMap = netFactory.getNetMap(); // Efficient net lookup
+
+        // Step 4: Create devices from netlist information
         List<Device> devices = DeviceFactory.createDevicesFromLines(netlistInfo.get("devices"));
 
-        Graph graph = GraphFactory.buildGraph(devices);
+        // Step 5: Build the graph using devices and the net map
+        Graph graph = GraphFactory.buildGraph(devices, netMap);
 
+        // Step 6: Return the constructed graph
         return graph;
     }
 }

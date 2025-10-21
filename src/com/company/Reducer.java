@@ -48,7 +48,7 @@ public class Reducer {
         long duration = endTime - startTime;
 
         // Directly update topology
-        topology = GraphFactory.buildGraph(reducedDevices);
+        topology = GraphFactory.buildGraph(reducedDevices, topology.getNetMap());
 
         System.out.printf("Total amount of devices: %d%n", reducedDevices.size());
         System.out.println("Time taken with parallel parallelCollector(): " + duration + " nanoseconds");
