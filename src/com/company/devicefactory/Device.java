@@ -275,4 +275,14 @@ public abstract class Device {
     public int hashCode() {
         return Objects.hash(name, pinsAndNets);
     }
+
+    public String getParam(String param) {
+
+        if (this.params.containsKey(param)){
+            return this.params.get(param);
+        } else {
+            System.out.println("The following param was not found: " + param);
+        }
+        return "";
+    }
 }

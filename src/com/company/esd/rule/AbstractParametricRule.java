@@ -1,16 +1,24 @@
 package com.company.esd.rule;
 
-import com.company.esd.result.EsdRuleResult;
+import com.company.devicefactory.Device;
 import com.company.esd.result.ResultCollector;
 
-public abstract class AbstractParametricRule implements ParametricRule {
+import java.util.List;
 
-    // Common properties or methods for parametric rules
+/**
+ * Base class for parametric ESD rules.
+ * Parametric rules validate numerical device parameters (e.g. area, nf, perimeter).
+ * Unlike structural rules, they do not perform topology traversal.
+ */
+public abstract class AbstractParametricRule {
 
-    public abstract void analyze(ResultCollector collector, EsdRuleResult result);
+    /**
+     * Analyzes the given list of devices according to the rule criteria.
+     * @param devices list of all devices in the design
+     * @param collector to record any violations
+     */
+    public abstract void analyze(List<Device> devices, ResultCollector collector);
 
-    protected boolean checkDeviceParameters(/* parameters */) {
-        // Common logic to check device parameters
-        return true; // Placeholder return
-    }
+    public abstract String getName();
+    public abstract String getDescription();
 }

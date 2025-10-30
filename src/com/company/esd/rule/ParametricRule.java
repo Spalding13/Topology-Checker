@@ -4,7 +4,10 @@ import com.company.esd.result.EsdRuleResult;
 import com.company.esd.result.ResultCollector;
 
 public interface ParametricRule {
-    void analyze(ResultCollector collector, EsdRuleResult result);
 
+    boolean analyze();
     String getDescription();
+
+    String getName();
+    String getMessage();
 }

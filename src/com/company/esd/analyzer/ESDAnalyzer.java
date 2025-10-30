@@ -48,19 +48,20 @@ public class ESDAnalyzer {
         }
 
         // Iterate through all parametric rules (if any)
-//        for (ParametricRule rule : parametricRules) {
-//            boolean valid = rule.analyze(graph);
-//
-//            EsdRuleResult result = new EsdRuleResult(
-//                    rule.getClass().getSimpleName(),
-//                    !valid, // violation if parametric condition not met
-//                    "Parametric rule check: " + rule.getDescription()
-//            );
-//
-//            System.out.println("Rule: " + rule.getClass().getSimpleName() + " → valid? " + valid);
-//
-//            resultCollector.addResult(result);
-//        }
+        for (ParametricRule rule : parametricRules) {
+            boolean valid = rule.analyze();
+
+            EsdRuleResult result = new EsdRuleResult(
+                    rule.getClass().getSimpleName(),
+                    !valid, // violation if parametric condition not met
+                    "Parametric rule check: " + rule.getDescription(),
+                    rule.getMessage()
+            );
+
+            System.out.println("Rule: " + rule.getClass().getSimpleName() + " → valid? " + valid);
+
+            resultCollector.addResult(result);
+        }
 
         return resultCollector;
     }

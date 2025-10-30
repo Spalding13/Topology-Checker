@@ -139,6 +139,10 @@ public class DeviceFactory {
             devices.add(device);
         });
 
+        deviceByTypeLocal.forEach((type, list) -> {
+            deviceByType.computeIfAbsent(type, k -> Collections.synchronizedList(new ArrayList<>()))
+                    .addAll(list);
+        });
 
         // Return the list of created devices
         return devices;
@@ -176,7 +180,7 @@ public class DeviceFactory {
     }
 
     // Getters for deviceByType and deviceByName
-    public Map<String, List<Device>> getDevicesByType() {
+    public static Map<String, List<Device>> getDevicesByType() {
         return deviceByType;
     }
 

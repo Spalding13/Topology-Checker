@@ -3,9 +3,7 @@ package com.company;
 import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
 import com.company.esd.analyzer.ESDAnalyzer;
-import com.company.esd.rule.AbstractStructuralRule;
-import com.company.esd.rule.EsdaRule;
-import com.company.esd.rule.StructuralRule;
+import com.company.esd.rule.*;
 import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
 import com.company.netFactory.Net;
@@ -43,13 +41,18 @@ public class Main {
         graph = Reducer.reduce(graph);
 
         // Step 7: Create ESD rules
-        EsdaRule rule = new EsdaRule();
-        List<StructuralRule> rules = new ArrayList<>();
-        rules.add(rule);
+        List<StructuralRule> structuralRules = new ArrayList<>();
+        List<ParametricRule> parametricRules = new ArrayList<>();
+
+        EsdaRule structuralRule = new EsdaRule();
+        EsdaParametricRule paramRule = new EsdaParametricRule();
+
+        parametricRules.add(paramRule);
+        structuralRules.add(structuralRule);
 
         System.out.println("Testing rule application...");
         // Uncomment and customize below when integrating rule analysis
-        ESDAnalyzer analyzer = new ESDAnalyzer(rules);
+        ESDAnalyzer analyzer = new ESDAnalyzer(structuralRules, parametricRules);
         analyzer.analyze(graph, ports);
         
     }

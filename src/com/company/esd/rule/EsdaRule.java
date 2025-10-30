@@ -30,14 +30,6 @@ public class EsdaRule extends AbstractStructuralRule {
         boolean isViolated = false;
 
 
-
-
-        // ##### Example logic to determine if rule is violated
-
-
-
-        // ##### Example logic to determine if rule is violated
-
         return new EsdRuleResult("ESDA Rule", isViolated, description);
     }
 
