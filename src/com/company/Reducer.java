@@ -94,7 +94,7 @@ public class Reducer {
                 String deviceType = firstDevice.getDeviceType();
 
                 // Use the factory class to create a combined device of the same type
-                return DeviceFactory.createCombinedDevice(group, deviceType);
+                return DeviceFactory.createCombinedDevice(group);
             }
         }).collect(Collectors.toList());
     }

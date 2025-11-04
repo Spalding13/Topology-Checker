@@ -13,14 +13,14 @@ public class EsdaParametricRule implements ParametricRule {
 
     @Override
     public boolean analyze() {
-        Map<String, List<Device>> deviceByType = DeviceFactory.getDevicesByType();
+        Map<String, List<Device>> deviceByType = DeviceFactory.getDevicesByModel();
         List<Device> esddiodes = deviceByType.getOrDefault("esddiode", List.of());
 
         boolean allValid = true;
         StringBuilder msgBuilder = new StringBuilder();
 
         for (Device device : esddiodes) {
-            double area = Double.parseDouble(device.getParam("area"));
+            double area = Double.parseDouble(device.getParam("areapd"));
             double nf = Double.parseDouble(device.getParam("nf"));
 
             if (area < MIN_AREA || nf < MIN_NF) {
@@ -32,7 +32,7 @@ public class EsdaParametricRule implements ParametricRule {
             }
         }
 
-        // ✅ If any violations found, set message
+        // If any violations found, set message
         if (!allValid) {
             setMessage(msgBuilder.toString().trim());
         }

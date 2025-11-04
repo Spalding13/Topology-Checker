@@ -2,189 +2,172 @@ package com.company.devicefactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
+/**
+ * DeviceFactory dynamically creates Device objects from CDL lines
+ * and manages them by both type (e.g., D, Q) and model name (e.g., esddiode).
+ * It also supports combining devices for the reduction process.
+ */
 public class DeviceFactory {
 
-    // Map to store devices grouped by their types
-    private static final Map<String, List<Device>> deviceByType = new HashMap<>();
+    // Grouped by high-level device type (e.g., D, Q)
+    private static final Map<String, List<Device>> devicesByType = new ConcurrentHashMap<>();
 
-    // Map to store devices by their names for easy lookup
-    private static final Map<String, Device> deviceByName = new HashMap<>();
+    // Grouped by model name (e.g., esddiode, esdvertpnp)
+    private static final Map<String, List<Device>> devicesByModel = new ConcurrentHashMap<>();
 
-    // Map to associate device type identifiers with their constructors
-    private static final Map<String, BiFunction<String, Device, Device>> deviceConstructorMap = new HashMap<>();
+    // For quick lookup by device name
+    private static final Map<String, Device> devicesByName = new ConcurrentHashMap<>();
 
-    // Static block to initialize maps
-    static {
-        initializeDeviceByTypeMap();
-        initializeDeviceConstructorMap();
+    private DeviceFactory() {
+        // Prevent instantiation
     }
 
     /**
-     * Initializes the map to store devices grouped by their types.
-     */
-    private static void initializeDeviceByTypeMap() {
-        deviceByType.put("esddiode", new ArrayList<>());
-        deviceByType.put("esdvertpnp", new ArrayList<>());
-        // Add more device types if needed
-    }
-
-    /**
-     * Initializes the map to associate device type identifiers with their constructors.
-     */
-    private static void initializeDeviceConstructorMap() {
-        deviceConstructorMap.put("esddiode", (line, device) -> line != null ? new Esddiode(line) : new Esddiode(device));
-        deviceConstructorMap.put("esdvertpnp", (line, device) -> line != null ? new Esdvertpnp(line) : new Esdvertpnp(device));
-        // Add more device types and their constructors as needed
-    }
-
-    /**
-     * Creates a combined device from a list of devices.
-     *
-     * @param devices    List of devices to be combined.
-     * @param deviceType Type of the combined device.
-     * @return A combined Device object.
-     */
-    public static Device createCombinedDevice(List<Device> devices, String deviceType) {
-        if (devices == null || devices.isEmpty()) {
-            throw new IllegalArgumentException("Device list cannot be null or empty.");
-        }
-
-        // Create a new combined device using the first device as a template
-        Device combinedDevice = createDeviceFromTemplate(devices.get(0));
-
-        // Set the device type
-        combinedDevice.setDeviceType(deviceType);
-
-        // Generate the combined name
-        String combinedName = generateCombinedName(devices);
-        combinedDevice.setName(combinedName);
-
-        // Set the model name for the combined device (use the model name of the first device)
-        combinedDevice.setModelName(devices.get(0).getModelName());
-
-        // Combine the pinsAndNets maps of all devices in the group
-        Map<String, String> combinedPinsAndNets = new HashMap<>();
-        for (Device device : devices) {
-            combinedPinsAndNets.putAll(device.getPinsAndNets());
-        }
-        combinedDevice.setPinsAndNets(combinedPinsAndNets);
-
-
-        // Set the pinNetMap for the combined device (use the pinNetMap of the first device)
-        combinedDevice.setPinNetMap(devices.get(0).getPinNetMap());
-
-        combinedDevice.setParams(combineParameters(devices));
-
-        // Return the combined device
-        return combinedDevice;
-    }
-
-    private static Map<String, String> combineParameters(List<Device> devices){
-
-        List<Map<String, String>> deviceParamMaps = new ArrayList<>();
-
-        for (Device device : devices) {
-            deviceParamMaps.add(device.getParams());
-        }
-
-        return devices.get(0).recalculateParallelParams(deviceParamMaps);
-    }
-
-    /**
-     * Generates the combined name for a list of devices.
-     *
-     * @param devices List of devices.
-     * @return Combined name.
-     */
-    private static String generateCombinedName(List<Device> devices) {
-        if (devices.size() == 1) {
-            return devices.get(0).getName();
-        } else {
-            return devices.stream()
-                    .map(Device::getName)
-                    .sorted() // Sort names in ascending order
-                    .reduce((name1, name2) -> name1 + "_" + name2) // Concatenate names with "_"
-                    .orElse("");  // Handle empty list case by providing a default value
-        }
-    }
-
-
-    /**
-     * Creates devices from a list of device lines.
-     *
-     * @param deviceLines List of device lines.
-     * @return List of created devices.
+     * Creates all devices from CDL lines.
      */
     public static List<Device> createDevicesFromLines(List<String> deviceLines) {
-        // Initialize the list to store created devices
         List<Device> devices = new ArrayList<>();
 
-        // Initialize a local map to accumulate devices by type
-        Map<String, List<Device>> deviceByTypeLocal = new ConcurrentHashMap<>();
+        for (String line : deviceLines) {
+            Device device = createDeviceFromLine(line);
+            if (device != null) {
+                devices.add(device);
 
-        // Iterate through each device line
-        deviceLines.forEach(line -> {
-            // Extract the device type and create the device
-            Device device = createDevice(line);
+                // Group by high-level type (D, Q, etc.)
+                devicesByType
+                        .computeIfAbsent(device.getDeviceType(), k -> Collections.synchronizedList(new ArrayList<>()))
+                        .add(device);
 
-            // Add the device to the corresponding type list in the local map
-            deviceByTypeLocal.computeIfAbsent(device.getDeviceType(), k -> new ArrayList<>()).add(device);
+                // Group by model name (esddiode, esdvertpnp, etc.)
+                devicesByModel
+                        .computeIfAbsent(device.getModelName().toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
+                        .add(device);
 
-            // Add the device to the map of devices by name
-            deviceByName.put(device.getName(), device);
+                // Add to name-based lookup
+                devicesByName.put(device.getName(), device);
+            }
+        }
 
-            // Add the device to the list of devices
-            devices.add(device);
-        });
-
-        deviceByTypeLocal.forEach((type, list) -> {
-            deviceByType.computeIfAbsent(type, k -> Collections.synchronizedList(new ArrayList<>()))
-                    .addAll(list);
-        });
-
-        // Return the list of created devices
         return devices;
     }
 
     /**
-     * Creates a device based on the device line content.
-     *
-     * @param line The device line.
-     * @return The created Device.
+     * Dynamically creates a Device from its CDL line and model name.
      */
-    private static Device createDevice(String line) {
+    private static Device createDeviceFromLine(String line) {
+        String model = extractModelFromLine(line);
 
-        for (Map.Entry<String, BiFunction<String, Device, Device>> entry : deviceConstructorMap.entrySet()) {
-            if (line.contains(entry.getKey())) {
-                return entry.getValue().apply(line, null);
-            }
+        if (model == null) {
+            System.err.println("[DeviceFactory] ⚠ Could not extract model name from line: " + line);
+            return new GenericDevice(line, "unknown");
         }
-        throw new IllegalArgumentException("Unable to determine or create device from line: " + line);
+
+        String className = "com.company.devicefactory." + capitalize(model);
+
+        try {
+            Class<?> clazz = Class.forName(className);
+            return (Device) clazz.getConstructor(String.class).newInstance(line);
+        } catch (ClassNotFoundException e) {
+            System.err.println("[DeviceFactory] ⚠ Unknown model '" + model + "'. Using GenericDevice fallback.");
+            return new GenericDevice(line, model);
+        } catch (Exception e) {
+            throw new RuntimeException("[DeviceFactory] Failed to instantiate device for model: " + model, e);
+        }
     }
 
     /**
-     * Creates a device based on the device object.
-     *
-     * @param device The existing device object.
-     * @return The new Device.
+     * Combine multiple devices into one representative (for reduction).
      */
-    private static Device createDeviceFromTemplate(Device device) {
-        String deviceModelName = device.getModelName().toLowerCase();
-        BiFunction<String, Device, Device> constructor = deviceConstructorMap.get(deviceModelName);
-        if (constructor != null) {
-            return constructor.apply(null, device); // Pass the device object to the constructor
+    public static Device createCombinedDevice(List<Device> devices) {
+        if (devices == null || devices.isEmpty()) {
+            throw new IllegalArgumentException("Device list cannot be null or empty.");
         }
-        throw new IllegalArgumentException("Unsupported device model: " + deviceModelName);
+
+        Device template = devices.get(0);
+        Device combined;
+
+        try {
+            combined = template.getClass().getConstructor(Device.class).newInstance(template);
+        } catch (Exception e) {
+            System.err.println("[DeviceFactory] ⚠ Could not clone " + template.getDeviceType() + ", using GenericDevice.");
+            combined = new GenericDevice(template);
+        }
+
+        combined.setName(generateCombinedName(devices));
+        combined.setParams(template.recalculateParallelParams(extractParams(devices)));
+
+        // Merge nets
+        Map<String, String> mergedPins = new HashMap<>();
+        for (Device d : devices) {
+            mergedPins.putAll(d.getPinsAndNets());
+        }
+        combined.setPinsAndNets(mergedPins);
+
+        // Register combined device
+        devicesByType
+                .computeIfAbsent(combined.getDeviceType(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(combined);
+
+        devicesByModel
+                .computeIfAbsent(combined.getModelName().toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(combined);
+
+        devicesByName.put(combined.getName(), combined);
+
+        return combined;
     }
 
-    // Getters for deviceByType and deviceByName
+    // --- Utility Methods ---
+
+    private static List<Map<String, String>> extractParams(List<Device> devices) {
+        List<Map<String, String>> params = new ArrayList<>();
+        for (Device d : devices) {
+            params.add(d.getParams());
+        }
+        return params;
+    }
+
+    private static String generateCombinedName(List<Device> devices) {
+        return devices.stream()
+                .map(Device::getName)
+                .sorted()
+                .reduce((a, b) -> a + "_" + b)
+                .orElse("COMBINED");
+    }
+
+    private static String extractModelFromLine(String line) {
+        String[] tokens = line.trim().split("\\s+");
+        String lastTokenBeforeParam = null;
+        for (String token : tokens) {
+            if (token.contains("=")) break;
+            lastTokenBeforeParam = token;
+        }
+        return lastTokenBeforeParam != null ? lastTokenBeforeParam.toLowerCase() : null;
+    }
+
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
+    // --- Getters ---
+
     public static Map<String, List<Device>> getDevicesByType() {
-        return deviceByType;
+        return devicesByType;
     }
 
-    public Map<String, Device> getDevicesByName() {
-        return deviceByName;
+    public static Map<String, List<Device>> getDevicesByModel() {
+        return devicesByModel;
+    }
+
+    public static Map<String, Device> getDevicesByName() {
+        return devicesByName;
+    }
+
+    public static void clear() {
+        devicesByType.clear();
+        devicesByModel.clear();
+        devicesByName.clear();
     }
 }
