@@ -22,6 +22,12 @@ public class EsdaParametricRule implements ParametricRule {
         StringBuilder msgBuilder = new StringBuilder();
 
         for (Device device : esddiodes) {
+
+            // TODO: In future, exclude mock/pattern devices at factory level instead of filtering here
+            if (device.getName().toLowerCase().contains("_ptrn")) {
+                continue; // Skip structural-only mock devices
+            }
+
             double area = parseScientificNotation(device.getParam("areapd")) * 1e12; // convert m² → µm²
             System.out.println(device.getName());
             System.out.println(area + " µm²");
