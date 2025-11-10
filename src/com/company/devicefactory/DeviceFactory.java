@@ -19,6 +19,9 @@ public class DeviceFactory {
     // For quick lookup by device name
     private static final Map<String, Device> devicesByName = new ConcurrentHashMap<>();
 
+    private static final Map<String, String> combinedDeviceTrace = new ConcurrentHashMap<>();
+
+
     private DeviceFactory() {
         // Prevent instantiation
     }
@@ -115,10 +118,45 @@ public class DeviceFactory {
 
         devicesByName.put(combined.getName(), combined);
 
+        // Replace original devices with the combined canonical one
+        replaceWithCombinedDevice(combined, devices);
+
         return combined;
     }
 
     // --- Utility Methods ---
+    private static void replaceWithCombinedDevice(Device combined, List<Device> originalDevices) {
+        //  Remove original (leaf) devices from all global maps
+        for (Device d : originalDevices) {
+            // Remove from devicesByType
+            List<Device> typeList = devicesByType.get(d.getDeviceType());
+            if (typeList != null) typeList.remove(d);
+
+            // Remove from devicesByModel
+            List<Device> modelList = devicesByModel.get(d.getModelName().toLowerCase());
+            if (modelList != null) modelList.remove(d);
+
+            // Remove from devicesByName
+            devicesByName.remove(d.getName());
+        }
+
+        // Optionally, store a trace mapping for reference (optional but useful)
+        for (Device d : originalDevices) {
+            combinedDeviceTrace.put(d.getName(), combined.getName());
+        }
+
+        // Add combined device to the canonical maps
+        devicesByType
+                .computeIfAbsent(combined.getDeviceType(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(combined);
+
+        devicesByModel
+                .computeIfAbsent(combined.getModelName().toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(combined);
+
+        devicesByName.put(combined.getName(), combined);
+    }
+
 
     private static List<Map<String, String>> extractParams(List<Device> devices) {
         List<Map<String, String>> params = new ArrayList<>();
