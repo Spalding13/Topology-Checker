@@ -4,6 +4,8 @@ import com.company.*;
 import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
 import com.company.esd.analyzer.ESDAnalyzer;
+import com.company.esd.result.ResultCollector;
+import com.company.esd.result.EsdRuleResult;
 import com.company.esd.rule.*;
 import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
@@ -27,6 +29,8 @@ public class MainGUI extends Application {
 
     private TextArea outputArea;
     private TableView<RuleResultEntry> ruleTable;
+    private GraphView beforeView;
+    private GraphView afterView;
 
 
     @Override
@@ -35,6 +39,11 @@ public class MainGUI extends Application {
 
         Label fileLabel = new Label("Select .cdl Netlist File:");
         Button browseButton = new Button("Browse...");
+        Label portsLabel = new Label("Ports:");
+        TextField portsField = new TextField();
+        portsField.setPromptText("e.g. PAD,VDD<1>,GND<1>");
+        // default ports (matches Main.java example)
+        portsField.setText("PAD,VDD<1>,GND<1>,GND<2>");
         Button runButton = new Button("Run Analysis");
 
         outputArea = new TextArea();
@@ -49,8 +58,12 @@ public class MainGUI extends Application {
         System.err.println("[DEBUG] Console redirect active: stderr -> TextArea");
 
         // --- File selection row ---
-        HBox fileBox = new HBox(10, fileLabel, browseButton);
+        HBox fileBox = new HBox(8, fileLabel, browseButton);
         fileBox.setPadding(new Insets(10));
+
+        // --- Ports row (below file selection) ---
+        HBox portsBox = new HBox(8, portsLabel, portsField);
+        portsBox.setPadding(new Insets(10));
 
         // --- Rule results table ---
         ruleTable = new TableView<>();
@@ -70,11 +83,25 @@ public class MainGUI extends Application {
         ruleTable.getColumns().addAll(nameCol, descCol, resultCol);
         ruleTable.setPrefHeight(200);
 
-        // --- Root layout with table and console ---
+        // --- Graph views (before / after reduction) ---
+        beforeView = new GraphView();
+        afterView = new GraphView();
+
+        TabPane graphTabs = new TabPane();
+        Tab beforeTab = new Tab("Before Reduction", beforeView);
+        beforeTab.setClosable(false);
+        Tab afterTab = new Tab("After Reduction", afterView);
+        afterTab.setClosable(false);
+        Tab resultsTab = new Tab("Rule Results", ruleTable);
+        resultsTab.setClosable(false);
+        graphTabs.getTabs().addAll(beforeTab, afterTab, resultsTab);
+
+        // --- Root layout with graph tabs and console ---
         VBox root = new VBox(10,
                 fileBox,
+                portsBox,
                 runButton,
-                new Label("Rule Results:"), ruleTable,
+                graphTabs,
                 new Label("Console Output:"), outputArea
         );
         root.setPadding(new Insets(15));
@@ -105,6 +132,21 @@ public class MainGUI extends Application {
                 return;
             }
 
+            // Parse ports from input field (comma-separated), trim whitespace
+            String portsText = portsField.getText() == null ? "" : portsField.getText().trim();
+            Set<String> portsSet = new HashSet<>();
+            List<String> portsList = new ArrayList<>();
+            if (!portsText.isEmpty()) {
+                String[] toks = portsText.split(",");
+                for (String t : toks) {
+                    String s = t.trim();
+                    if (!s.isEmpty()) {
+                        portsSet.add(s);
+                        portsList.add(s);
+                    }
+                }
+            }
+
             // Disable buttons while running
             runButton.setDisable(true);
             browseButton.setDisable(true);
@@ -113,7 +155,7 @@ public class MainGUI extends Application {
             Task<Void> task = new Task<>() {
                 @Override
                 protected Void call() throws Exception {
-                    runAnalysis(selectedFile[0]);
+                    runAnalysis(selectedFile[0], portsSet, portsList);
                     return null;
                 }
             };
@@ -136,13 +178,13 @@ public class MainGUI extends Application {
     }
 
 
-    private void runAnalysis(File file) {
+    private void runAnalysis(File file, Set<String> portsSet, List<String> portsList) {
         try {
             // Use Platform.runLater when interacting with UI elements from background threads
             appendOutput("Running ESD analysis...\n");
 
             // Step 1: Define ports (can be configurable later)
-            List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
+            // List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
 
             // Step 2: Read the .cdl input file
             String input = NetlistReader.openFile(file.getAbsolutePath());
@@ -160,11 +202,35 @@ public class MainGUI extends Application {
             List<Net> nets = netFactory.createNets(netlistInfo.get("nets"));
             List<Device> devices = DeviceFactory.createDevicesFromLines(netlistInfo.get("devices"));
 
-            // Step 5: Build graph
+            // Ensure port nets exist in the netFactory map (create them if missing)
+            if (portsSet != null && !portsSet.isEmpty()) {
+                Map<String, Net> netMap = netFactory.getNetMap();
+                for (String portName : portsSet) {
+                    if (!netMap.containsKey(portName)) {
+                        Net pnet = new Net(portName);
+                        netMap.put(portName, pnet);
+                    }
+                }
+            }
+
+            // Step 5: Build graph (before reduction view)
             Graph graph = GraphFactory.buildGraph(devices, netFactory.getNetMap());
+            // Update before reduction view and set port busses
+            final Graph graphBefore = graph;
+            Platform.runLater(() -> {
+                beforeView.setPorts(portsList);
+                beforeView.setGraph(graphBefore);
+            });
 
             // Step 6: Reduce graph
-            graph = Reducer.reduce(graph);
+            Graph reduced = Reducer.reduce(graph);
+            // Update after reduction view
+            final Graph graphAfter = reduced;
+            Platform.runLater(() -> {
+                afterView.setPorts(portsList);
+                afterView.setGraph(graphAfter);
+            });
+            // Use 'reduced' for analysis
 
             // Step 7: Prepare rules
             List<StructuralRule> structuralRules = new ArrayList<>();
@@ -178,7 +244,20 @@ public class MainGUI extends Application {
 
             // Step 8: Run analyzer
             ESDAnalyzer analyzer = new ESDAnalyzer(structuralRules, parametricRules);
-            analyzer.analyze(graph, ports);
+            // Collect results and populate rule table in the GUI
+            ResultCollector collector = analyzer.analyze(reduced, portsList);
+            List<EsdRuleResult> results = collector.getResults();
+            Platform.runLater(() -> {
+                ruleTable.getItems().clear();
+                for (EsdRuleResult r : results) {
+                    String status = r.isViolated() ? "VIOLATED" : "OK";
+                    String resultText = status;
+                    if (r.getMessage() != null && !r.getMessage().isEmpty()) {
+                        resultText += ": " + r.getMessage();
+                    }
+                    ruleTable.getItems().add(new RuleResultEntry(r.getRuleName(), r.getDescription(), resultText));
+                }
+            });
 
             appendOutput("\nAnalysis complete!\n");
             appendOutput("Rules executed: " + (parametricRules.size() + structuralRules.size()) + "\n");
