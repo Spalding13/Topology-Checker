@@ -20,7 +20,7 @@ public class Main {
         List<String> ports = Arrays.asList("PAD", "VDD<1>", "GND<1>", "GND<2>");
 
         // Step 2: Read the .cdl input file into a string
-        String inputPath = "E:\\ESD Checks\\input\\netlist.cdl";
+        String inputPath = "E:\\ESD Checks\\input\\netlist_large.cdl";
         String input = NetlistReader.openFile(inputPath);
 
         // Step 3: Parse the netlist using StateMachine

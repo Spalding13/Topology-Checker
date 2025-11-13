@@ -38,7 +38,7 @@ public class Reducer {
 
         Graph topology_temp = topology;
         List<Device> reducedDevices =
-                topology.netNodeMap.values().stream()
+                topology.netNodeMap.values().parallelStream()
                         .flatMap(netNode -> parallelCollector(topology_temp, netNode, visitedDevices).stream())
                         //.distinct() // Ensure devices are unique. Can be explored in future version
                         .collect(Collectors.toList());
