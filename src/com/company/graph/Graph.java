@@ -24,6 +24,8 @@ public class Graph {
         // No need to initialize adjacencyList in the constructor, it's already done above
     }
 
+
+
     /**
      * Retrieves all nodes in the graph.
      * @return A collection of all nodes in the graph.
@@ -183,5 +185,90 @@ public class Graph {
         }
         return netMap;
     }
+
+    public Graph deepCopy(Map<String, Net> netMap) {
+        Graph copy = new Graph();
+
+        Map<Node, Node> nodeMap = new HashMap<>();
+
+        // --- 1. Copy nodes ---
+        for (Node original : this.getNodes()) {
+
+            Node newNode;
+
+            // Device node
+            if (original.getDevice() != null) {
+                Device origDev = original.getDevice();
+                Device newDev;
+
+                try {
+                    newDev = origDev.getClass()
+                            .getConstructor(Device.class)
+                            .newInstance(origDev);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to copy device: " + origDev.getName(), e);
+                }
+
+                copy.addDeviceNode(newDev);
+                newNode = copy.deviceNodeMap.get(newDev.getName());
+            }
+
+            // Net node
+            else {
+                Net origNet = original.getNet();
+                Net mappedNet = netMap.get(origNet.getName());
+
+                copy.addNetNode(mappedNet);
+                newNode = copy.netNodeMap.get(mappedNet.getName());
+            }
+
+            nodeMap.put(original, newNode);
+        }
+
+        // --- 2. Copy adjacency list ---
+        for (Map.Entry<Node, List<Connection>> entry : this.adjacencyList.entrySet()) {
+            Node originalNode = entry.getKey();
+            Node newNode = nodeMap.get(originalNode);
+
+            for (Connection conn : entry.getValue()) {
+                Node origNeighbor = conn.getNode();
+                Node newNeighbor = nodeMap.get(origNeighbor);
+
+                copy.addEdge(newNode, newNeighbor, conn.getPin());
+            }
+        }
+
+        return copy;
+    }
+
+    // For Benchmarking and comparison  purposes
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Graph other)) return false;
+
+        return this.deviceNodeMap.keySet().equals(other.deviceNodeMap.keySet()) &&
+                this.netNodeMap.keySet().equals(other.netNodeMap.keySet()) &&
+                adjacencyEquals(this.adjacencyList, other.adjacencyList);
+    }
+
+    private boolean adjacencyEquals(Map<Node, List<Connection>> a,
+                                    Map<Node, List<Connection>> b) {
+        if (a.size() != b.size()) return false;
+
+        for (Node n : a.keySet()) {
+            List<Connection> listA = a.get(n);
+            List<Connection> listB = b.get(n);
+            if (listB == null) return false;
+
+            if (listA.size() != listB.size()) return false;
+
+            // Connection order doesn't matter -> compare as sets
+            if (!new HashSet<>(listA).equals(new HashSet<>(listB))) return false;
+        }
+
+        return true;
+    }
+
 
 }

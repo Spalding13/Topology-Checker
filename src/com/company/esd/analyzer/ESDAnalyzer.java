@@ -13,8 +13,8 @@ import java.util.List;
 
 public class ESDAnalyzer {
 
-    private List<StructuralRule> structuralRules;
-    private List<ParametricRule> parametricRules;
+    private final List<StructuralRule> structuralRules;
+    private final List<ParametricRule> parametricRules;
 
     public ESDAnalyzer(List<StructuralRule> structuralRules, List<ParametricRule> parametricRules) {
         this.structuralRules = structuralRules;

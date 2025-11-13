@@ -3,6 +3,8 @@ package com.company.graph;
 import com.company.devicefactory.Device;
 import com.company.netFactory.Net;
 
+import java.util.Objects;
+
 /**
  * Represents a directional connection between a {@link Node} (which may be a Device or a Net)
  * and a specific pin or terminal.
@@ -81,4 +83,19 @@ public class Connection {
     public String toString() {
         return this.node.toString() + " : " + this.pin;
     }
+
+    // For Benchmarking and comparison  purposes
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Connection other)) return false;
+        return Objects.equals(node, other.node) &&
+                Objects.equals(pin, other.pin);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(node, pin);
+    }
+
 }

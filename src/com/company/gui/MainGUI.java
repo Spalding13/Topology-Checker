@@ -11,6 +11,7 @@ import com.company.graph.Graph;
 import com.company.graph.GraphFactory;
 import com.company.netFactory.Net;
 import com.company.netFactory.NetFactory;
+import com.company.reducer.Reducer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;

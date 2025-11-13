@@ -45,6 +45,15 @@ public abstract class Device {
         // Default constructor
     }
 
+    public Device(Device other) {
+        this.deviceType = other.deviceType;
+        this.name = other.name;
+        this.modelName = other.modelName;
+        this.pinsAndNets = new HashMap<>(other.pinsAndNets);
+        this.params = new HashMap<>(other.params);
+    }
+
+
     /**
      * Extracts the name of the device from the given line of text.
      * @param deviceLine The line containing device information.

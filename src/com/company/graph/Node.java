@@ -4,6 +4,7 @@ import com.company.devicefactory.Device;
 import com.company.netFactory.Net;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Node {
 
@@ -14,15 +15,26 @@ public class Node {
 
     private Map<Object, String> connection;
 
-    // Constructor -- could be better
     public Node(Device device, Net net){
-
         if (device!= null) setType("Device");
         if (net!=null)     setType("Net");
 
         this.device = device;
         this.net = net;
     }
+
+    public Node() { }
+
+    public void setDevice(Device device) {
+        this.device = device;
+        if (device != null) this.type = "Device";
+    }
+
+    public void setNet(Net net) {
+        this.net = net;
+        if (net != null) this.type = "Net";
+    }
+
 
     public Object getVertex() {
         return vertex;
@@ -68,6 +80,19 @@ public class Node {
         }
 
         return elementName;
+    }
+
+    // For benchmarking and comparison purposes
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Node other)) return false;
+        return Objects.equals(this.toString(), other.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.toString());
     }
 
 }
