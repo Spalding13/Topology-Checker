@@ -1,7 +1,8 @@
-package com.company.reducer;
+package com.company.reducer_benchmark;
 
 import com.company.graph.Graph;
 import com.company.graph.Node;
+import com.company.reducer.ReducerUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

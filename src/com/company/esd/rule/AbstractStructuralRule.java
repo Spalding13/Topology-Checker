@@ -1,6 +1,6 @@
 package com.company.esd.rule;
 import com.company.NetlistReader;
-import com.company.StateMachine;
+import com.company.NetlistInterpreter;
 import com.company.devicefactory.Device;
 import com.company.devicefactory.DeviceFactory;
 import com.company.graph.Graph;
@@ -26,11 +26,11 @@ public abstract class AbstractStructuralRule implements StructuralRule {
     protected Graph initializePattern() throws IOException {
         // Step 1: Parse the input netlist file
         String inputPath = "E:\\ESD Checks\\input\\esda_ptrn.cdl";
-        StateMachine stateMachine = new StateMachine();
+        NetlistInterpreter netlistInterpreter = new NetlistInterpreter();
         String input = NetlistReader.openFile(inputPath);
 
         // Step 2: Extract netlist information
-        Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
+        Map<String, List<String>> netlistInfo = netlistInterpreter.parseNetlist(input);
 
         // Step 3: Create nets and generate a map of nets
         NetFactory netFactory = new NetFactory();

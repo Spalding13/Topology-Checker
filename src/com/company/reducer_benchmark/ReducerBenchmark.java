@@ -2,7 +2,7 @@ package com.company.reducer_benchmark;
 
 import com.company.graph.Graph;
 import com.company.netFactory.Net;
-import com.company.reducer.SequentialReducer;
+import com.company.reducer_benchmark.SequentialReducer;
 import com.company.reducer.ParallelReducer;
 
 import java.util.Map;

@@ -24,6 +24,34 @@ public class Graph {
         // No need to initialize adjacencyList in the constructor, it's already done above
     }
 
+    /**
+     * Shuffle node iteration order ONLY for benchmarking.
+     * Does NOT change topology, edges, or references.
+     *
+     * Works safely because deviceNodeMap and netNodeMap are LinkedHashMaps.
+     */
+    public void shuffleNodeOrder() {
+        List<Node> all = new ArrayList<>();
+        all.addAll(deviceNodeMap.values());
+        all.addAll(netNodeMap.values());
+
+        // Deterministic shuffle for reproducible benchmarking
+        Collections.shuffle(all, new Random(123456));
+
+        // Clear maps and reinsert nodes in shuffled order
+        deviceNodeMap.clear();
+        netNodeMap.clear();
+
+        for (Node n : all) {
+            if (n.getDevice() != null) {
+                deviceNodeMap.put(n.getDevice().getName(), n);
+            } else if (n.getNet() != null) {
+                netNodeMap.put(n.getNet().getName(), n);
+            }
+        }
+    }
+
+
 
 
     /**

@@ -33,8 +33,11 @@ public class ESDAnalyzer {
         for (StructuralRule rule : structuralRules) {
             Graph pattern = rule.getPattern();
 
-            NaiveSI naiveSI = new NaiveSI(graph, pattern);
-            boolean patternMatched = naiveSI.isSubgraphIsomorphic();
+//            NaiveSI naiveSI = new NaiveSI(graph, pattern);
+//            boolean patternMatched = naiveSI.isSubgraphIsomorphic();
+//
+            AdvancedSI advancedSI = new AdvancedSI(graph, pattern);
+            boolean patternMatched = advancedSI.isSubgraphIsomorphic();
 
             EsdRuleResult result = new EsdRuleResult(
                     rule.getClass().getSimpleName(),

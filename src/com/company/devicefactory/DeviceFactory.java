@@ -35,6 +35,7 @@ public class DeviceFactory {
         for (String line : deviceLines) {
             Device device = createDeviceFromLine(line);
             if (device != null) {
+
                 devices.add(device);
 
                 // Group by high-level type (D, Q, etc.)
@@ -62,7 +63,7 @@ public class DeviceFactory {
         String model = extractModelFromLine(line);
 
         if (model == null) {
-            System.err.println("[DeviceFactory] ⚠ Could not extract model name from line: " + line);
+            //System.err.println("[DeviceFactory] ⚠ Could not extract model name from line: " + line);
             return new GenericDevice(line, "unknown");
         }
 
@@ -79,9 +80,6 @@ public class DeviceFactory {
         }
     }
 
-    /**
-     * Combine multiple devices into one representative (for reduction).
-     */
     public static Device createCombinedDevice(List<Device> devices) {
         if (devices == null || devices.isEmpty()) {
             throw new IllegalArgumentException("Device list cannot be null or empty.");
@@ -90,6 +88,7 @@ public class DeviceFactory {
         Device template = devices.get(0);
         Device combined;
 
+        // Use reflection to duplicate a device of the same type
         try {
             combined = template.getClass().getConstructor(Device.class).newInstance(template);
         } catch (Exception e) {
@@ -97,6 +96,7 @@ public class DeviceFactory {
             combined = new GenericDevice(template);
         }
 
+        // Assign combined properties
         combined.setName(generateCombinedName(devices));
         combined.setParams(template.recalculateParallelParams(extractParams(devices)));
 
@@ -107,18 +107,8 @@ public class DeviceFactory {
         }
         combined.setPinsAndNets(mergedPins);
 
-        // Register combined device
-        devicesByType
-                .computeIfAbsent(combined.getDeviceType(), k -> Collections.synchronizedList(new ArrayList<>()))
-                .add(combined);
-
-        devicesByModel
-                .computeIfAbsent(combined.getModelName().toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
-                .add(combined);
-
-        devicesByName.put(combined.getName(), combined);
-
-        // Replace original devices with the combined canonical one
+        // IMPORTANT: Do NOT register the combined device here.
+        // Just replace leaf devices with the canonical combined one in the global maps.
         replaceWithCombinedDevice(combined, devices);
 
         return combined;
@@ -126,37 +116,44 @@ public class DeviceFactory {
 
     // --- Utility Methods ---
     private static void replaceWithCombinedDevice(Device combined, List<Device> originalDevices) {
-        //  Remove original (leaf) devices from all global maps
+        // 1) Remove original (leaf) devices from all global maps
         for (Device d : originalDevices) {
             // Remove from devicesByType
             List<Device> typeList = devicesByType.get(d.getDeviceType());
-            if (typeList != null) typeList.remove(d);
+            if (typeList != null) {
+                typeList.remove(d);
+            }
 
             // Remove from devicesByModel
-            List<Device> modelList = devicesByModel.get(d.getModelName().toLowerCase());
-            if (modelList != null) modelList.remove(d);
+            String modelKey = d.getModelName() != null ? d.getModelName().toLowerCase() : null;
+            if (modelKey != null) {
+                List<Device> modelList = devicesByModel.get(modelKey);
+                if (modelList != null) {
+                    modelList.remove(d);
+                }
+            }
 
             // Remove from devicesByName
             devicesByName.remove(d.getName());
-        }
 
-        // Optionally, store a trace mapping for reference (optional but useful)
-        for (Device d : originalDevices) {
+            // Optional: trace leaf → combined
             combinedDeviceTrace.put(d.getName(), combined.getName());
         }
 
-        // Add combined device to the canonical maps
+        // 2) Add combined device once to the canonical maps
         devicesByType
                 .computeIfAbsent(combined.getDeviceType(), k -> Collections.synchronizedList(new ArrayList<>()))
                 .add(combined);
 
-        devicesByModel
-                .computeIfAbsent(combined.getModelName().toLowerCase(), k -> Collections.synchronizedList(new ArrayList<>()))
-                .add(combined);
+        String combinedModelKey = combined.getModelName() != null ? combined.getModelName().toLowerCase() : null;
+        if (combinedModelKey != null) {
+            devicesByModel
+                    .computeIfAbsent(combinedModelKey, k -> Collections.synchronizedList(new ArrayList<>()))
+                    .add(combined);
+        }
 
         devicesByName.put(combined.getName(), combined);
     }
-
 
     private static List<Map<String, String>> extractParams(List<Device> devices) {
         List<Map<String, String>> params = new ArrayList<>();

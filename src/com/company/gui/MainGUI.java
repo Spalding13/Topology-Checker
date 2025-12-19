@@ -195,8 +195,8 @@ public class MainGUI extends Application {
             }
 
             // Step 3: Parse netlist
-            StateMachine stateMachine = new StateMachine();
-            Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
+            NetlistInterpreter netlistInterpreter = new NetlistInterpreter();
+            Map<String, List<String>> netlistInfo = netlistInterpreter.parseNetlist(input);
 
             // Step 4: Create nets and devices
             NetFactory netFactory = new NetFactory();

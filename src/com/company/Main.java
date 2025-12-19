@@ -10,6 +10,7 @@ import com.company.netFactory.Net;
 import com.company.netFactory.NetFactory;
 import com.company.reducer.Reducer;
 import com.company.reducer_benchmark.ReducerBenchmark;
+import com.company.si_benchmark.SIBenchmark;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,7 +20,9 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        final boolean EXPERIMENT_MODE = true;
+        final boolean REDUCER_EXPERIMENT_MODE = true;
+        final boolean SI_EXPERIMENT_MODE = false;
+
 
 
         // Step 1: Define ports
@@ -30,9 +33,9 @@ public class Main {
         String input = NetlistReader.openFile(inputPath);
 
         // Step 3: Parse the netlist using StateMachine
-        StateMachine stateMachine = new StateMachine();
+        NetlistInterpreter netlistInterpreter = new NetlistInterpreter();
         assert input != null;
-        Map<String, List<String>> netlistInfo = stateMachine.parseNetlist(input);
+        Map<String, List<String>> netlistInfo = netlistInterpreter.parseNetlist(input);
 
         // Step 4: Create nets and devices from parsed information
         NetFactory netFactory = new NetFactory();
@@ -44,9 +47,15 @@ public class Main {
         Graph graph = GraphFactory.buildGraph(devices, netFactory.getNetMap());
 
         // --- EXPERIMENT MODE ---
-        if (EXPERIMENT_MODE) {
+        if (REDUCER_EXPERIMENT_MODE) {
             System.out.println("\n=== Running Reducer Benchmark Experiment ===");
             ReducerBenchmark.run(graph);
+            return;
+        }
+
+        if (SI_EXPERIMENT_MODE) {
+            System.out.println("\n=== Running SI Benchmark Experiment ===");
+            SIBenchmark.runSynthetic();
             return;
         }
 

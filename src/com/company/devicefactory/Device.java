@@ -59,14 +59,16 @@ public abstract class Device {
      * @param deviceLine The line containing device information.
      */
     public void extractName(String[] deviceLine) {
-        Pattern namePattern = Pattern.compile("[A-Z]+[0-9]+");
+        Pattern namePattern = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*");
 
         for (String token : deviceLine) {
-            if(namePattern.matcher(token).find()) {
-                name = token;
-                break;
+            if (namePattern.matcher(token).find()) {
+                this.name = token;
+                return;
             }
         }
+
+        System.err.println("[WARN] Could not extract device name from line: " + String.join(" ", deviceLine));
     }
 
     /**

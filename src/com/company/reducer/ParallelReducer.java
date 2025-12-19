@@ -69,4 +69,22 @@ public class ParallelReducer {
         // Rebuild graph
         return GraphFactory.buildGraph(reduced, topology.getNetMap());
     }
+
+    private List<List<Device>> deduplicateGroups(List<List<Device>> groups) {
+        Set<Set<String>> seen = new HashSet<>();
+        List<List<Device>> result = new ArrayList<>();
+
+        for (List<Device> group : groups) {
+            // Represent a group deterministically
+            Set<String> names = group.stream()
+                    .map(Device::getName)
+                    .collect(Collectors.toCollection(TreeSet::new)); // sorted
+
+            if (seen.add(names)) {
+                result.add(group);
+            }
+        }
+        return result;
+    }
+
 }
