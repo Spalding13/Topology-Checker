@@ -2,7 +2,6 @@ package com.company.reducer_benchmark;
 
 import com.company.graph.Graph;
 import com.company.netFactory.Net;
-import com.company.reducer_benchmark.SequentialReducer;
 import com.company.reducer.ParallelReducer;
 
 import java.util.Map;
@@ -39,11 +38,19 @@ public class ReducerBenchmark {
         System.out.printf("Sequential Devices: %d%n", seqCount);
         System.out.printf("Parallel Devices:   %d%n", parCount);
 
-        System.out.printf("Sequential Time: %,d ns%n", seqTime);
-        System.out.printf("Parallel Time:   %,d ns%n", parTime);
+        // Convert to milliseconds for more visible output and format with 3 decimals
+        double seqMs = seqTime / 1_000_000.0;
+        double parMs = parTime / 1_000_000.0;
 
-        double speedup = (double) seqTime / parTime;
-        System.out.printf("Speedup factor:  %.2fx%n", speedup);
+        System.out.printf("Sequential Time: %,.3f ms%n", seqMs);
+        System.out.printf("Parallel Time:   %,.3f ms%n", parMs);
+
+        if (parTime > 0) {
+            double speedup = (double) seqTime / parTime;
+            System.out.printf("Speedup factor:  %.2fx%n", speedup);
+        } else {
+            System.out.println("Speedup factor:  N/A (parallel time is zero)");
+        }
 
         boolean same = seqGraph.deviceNodeMap.keySet()
                 .equals(parGraph.deviceNodeMap.keySet());
@@ -54,6 +61,6 @@ public class ReducerBenchmark {
             System.out.println("⚠ WARNING: Reducers do NOT produce identical graphs!");
         }
 
-        System.out.println("===================================================");
+        System.out.println("==================================================");
     }
 }

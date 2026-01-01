@@ -1,3 +1,19 @@
 .idea/
 /out/
 libs
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pytest cache
+.pytest_cache/
+
+# VSCode
+.vscode/

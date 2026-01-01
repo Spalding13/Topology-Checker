@@ -29,7 +29,7 @@ public class GraphFactory {
         addNodesAndEdges(graph, devices);
 
         // Print the graph for debugging purposes
-        graph.printGraph();
+        // graph.printGraph();
 
         return graph;
     }

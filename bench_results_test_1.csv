@@ -1,0 +1,6 @@
+inputFile,devices,parse_ms_median,parse_ms_p90,seq_ms_median,seq_ms_p90,par_ms_median,par_ms_p90
+E:\ESD Checks\input\netlist_1k.cdl,1k,26.422,32.283,10.426,14.310,7.449,13.197
+E:\ESD Checks\input\netlist_10k.cdl,10k,946.369,977.135,363.830,380.169,56.818,97.469
+E:\ESD Checks\input\netlist_30k.cdl,30k,8080.655,8372.743,1407.022,1450.724,375.735,514.844
+E:\ESD Checks\input\netlist_60k.cdl,60k,64308.575,69472.842,14861.957,16646.893,1355.275,1438.953
+E:\ESD Checks\input\netlist_100k.cdl,100k,240532.094,292945.305,38300.945,39324.934,3414.797,3521.154
