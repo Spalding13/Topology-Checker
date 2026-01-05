@@ -117,7 +117,3 @@ Interpreting benchmark results
 - Prefer medians over single-run values.
 - `p90` indicates tail behavior: if `p90` is much larger than median, the run has unstable long tail (GC/IO spikes).
 - Use `par_ms_median` vs `seq_ms_median` to evaluate parallel speedup; compute speedup = `seq_ms_median / par_ms_median`.
-
----
-Generated on: 2025-12-22
-
